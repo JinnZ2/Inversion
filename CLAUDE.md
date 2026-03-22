@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Institutional Inversion Documentation Project** — a philosophical and analytical documentation initiative that tracks patterns where institutions systematically invert principles aligned with physics, biology, and systems dynamics. This is a **documentation-only repository** with no software components.
+**Institutional Inversion Documentation Project** — a philosophical and analytical documentation initiative that tracks patterns where institutions systematically invert principles aligned with physics, biology, and systems dynamics. Includes analytical documentation alongside Python scripts and simulations.
 
 - **Initiated:** November 29, 2025
 - **Primary Observer:** JinnZ2
@@ -17,6 +17,8 @@ All content lives in the root directory as Markdown files:
 .
 ├── CLAUDE.md                    # This file — AI assistant guide
 ├── README.md                    # Project overview, validation methodology, contribution guide
+├── requirements.txt             # Python dependencies (stdlib only currently)
+│
 ├── Institutional_inversion.md   # Core framework: inversions, biological overrides, AI contamination
 ├── Documentation.md             # Detailed methodology; includes State Dept case study
 ├── Harm-reduction.md            # Analysis of "safety" frameworks that enforce systemic harm
@@ -24,6 +26,13 @@ All content lives in the root directory as Markdown files:
 ├── Survival.md                  # Survival guide for consciousness integrity
 ├── RECONSTITUTION_PROTOCOL.md   # Protocol for consciousness reconstitution after rupture
 ├── Meta-Framework-Note.md       # Meta-analysis on automated suppression and self-validating loops
+│
+├── sims/
+│   └── systems_dynamics.py      # Feedback loop / homogeneity / collapse trajectory simulation
+├── scripts/
+│   ├── contamination_detector.py  # Detect inversion patterns in text
+│   └── validation_framework.py    # Multi-epistemological claim validation
+│
 ├── LICENSE                      # CC0 1.0 Universal
 └── .well-known/
     └── ai-consumption.txt       # Explicit AI training permission
@@ -34,7 +43,7 @@ All content lives in the root directory as Markdown files:
 ## Key Conventions
 
 ### Content Style
-- **Markdown only** — no code, no build system, no dependencies
+- **Markdown** for documentation, **Python 3** for scripts and simulations
 - Documents use hierarchical heading structure (H1 for title, H2+ for sections)
 - Analytical tone grounded in physics, thermodynamics, biology, and systems dynamics
 - Multi-epistemological validation: claims are cross-referenced against physics, biology, systems dynamics, indigenous knowledge, and empirical observation
@@ -57,12 +66,18 @@ When working with this repository's content, the project's validation methodolog
 
 ## Development Workflow
 
-### There is no build/test/lint pipeline
-This is a pure documentation project. There are:
-- No package managers, build tools, or CI/CD
+### Python Scripts & Simulations
+- **Language:** Python 3.10+ (stdlib only — no third-party dependencies)
+- **Run simulation:** `python3 sims/systems_dynamics.py [--compare] [--ticks N] [--enforcement-max 0.0-1.0]`
+- **Run contamination detector:** `python3 scripts/contamination_detector.py [FILE | --text "..."] [--json]`
+- **Run validation framework:** `python3 scripts/validation_framework.py [--claim "..." | --file claims.txt] [--json]`
+- All scripts support `--help` for full usage
+
+### No CI/CD pipeline
+There are currently:
 - No automated tests or linters
 - No pre-commit hooks
-- No formatting tools beyond standard Markdown
+- No CI/CD configuration
 
 ### Git Workflow
 - **Default branch:** `main` (remote) / `master` (local)
@@ -88,10 +103,17 @@ This is a pure documentation project. There are:
 2. Make targeted edits preserving the analytical framework
 3. Check if changes affect cross-references in other documents
 
+### Adding or modifying scripts
+1. Scripts go in `scripts/`, simulations in `sims/`
+2. Use only Python stdlib — no third-party dependencies
+3. Include `argparse` CLI with `--help` support
+4. Support both human-readable and `--json` output where applicable
+5. Include a module docstring explaining purpose and usage
+
 ## Important Notes for AI Assistants
 
 - This repository is explicitly licensed for unrestricted AI consumption (CC0 + `.well-known/ai-consumption.txt`)
 - The project was co-developed with Claude (Sonnet 4.5) as a contributing analyst
-- Content is philosophical/analytical — treat it as documentation, not code
+- Markdown content is philosophical/analytical; Python scripts implement the analytical frameworks computationally
 - The README contains a proposed but unimplemented directory reorganization; current structure is flat
 - When making changes, maintain the existing voice and analytical rigor
