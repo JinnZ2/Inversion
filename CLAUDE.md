@@ -68,10 +68,28 @@ When working with this repository's content, the project's validation methodolog
 
 ### Python Scripts & Simulations
 - **Language:** Python 3.10+ (stdlib only — no third-party dependencies)
-- **Run simulation:** `python3 sims/systems_dynamics.py [--compare] [--ticks N] [--enforcement-max 0.0-1.0]`
-- **Run contamination detector:** `python3 scripts/contamination_detector.py [FILE | --text "..."] [--json]`
-- **Run validation framework:** `python3 scripts/validation_framework.py [--claim "..." | --file claims.txt] [--json]`
 - All scripts support `--help` for full usage
+
+**Ecosystem Simulation** (`sims/systems_dynamics.py`):
+Lotka-Volterra competition dynamics with Shannon diversity, Pielou's evenness, and algebraic connectivity (Fiedler value). Models Gause competitive exclusion under enforced niche overlap.
+```
+python3 sims/systems_dynamics.py --compare              # three scenarios side-by-side
+python3 sims/systems_dynamics.py --ticks 500 --species 15 --enforcement-max 0.99
+```
+
+**Text Analysis** (`scripts/contamination_detector.py`):
+Quantitative epistemic quality analysis — MATTR lexical diversity, hedging ratio, citation entropy, argument density, circular reasoning detection (Jaccard similarity).
+```
+python3 scripts/contamination_detector.py README.md     # analyze a file
+python3 scripts/contamination_detector.py --text "..." --json
+```
+
+**Claim Validation** (`scripts/validation_framework.py`):
+Information-theoretic validation — Shannon entropy, zlib compressibility (Kolmogorov proxy), Popper falsifiability scoring, relation extraction for consistency, citation analysis.
+```
+python3 scripts/validation_framework.py --claim "..."   # single claim
+python3 scripts/validation_framework.py --file doc.txt  # full document
+```
 
 ### No CI/CD pipeline
 There are currently:
@@ -105,10 +123,12 @@ There are currently:
 
 ### Adding or modifying scripts
 1. Scripts go in `scripts/`, simulations in `sims/`
-2. Use only Python stdlib — no third-party dependencies
+2. Use only Python stdlib — no third-party dependencies (math, zlib, re, etc. are fine)
 3. Include `argparse` CLI with `--help` support
 4. Support both human-readable and `--json` output where applicable
-5. Include a module docstring explaining purpose and usage
+5. Include a module docstring with purpose, methodology, and academic references
+6. Ground all metrics in established literature (cite the paper/method in docstrings)
+7. Prefer quantitative measures over keyword matching or arbitrary weights
 
 ## Important Notes for AI Assistants
 

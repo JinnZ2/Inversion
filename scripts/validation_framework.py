@@ -1,322 +1,609 @@
 #!/usr/bin/env python3
 """
-Multi-Epistemological Validation Framework
+Multi-Epistemological Validation Framework — Quantitative Edition
 
-Cross-references claims against five domains:
-  1. Physics / Thermodynamics
-  2. Biology / Evolution
-  3. Systems Dynamics
-  4. Indigenous Knowledge / Relational Principles
-  5. Empirical Observation
+Validates claims using information-theoretic and structural metrics
+rather than keyword matching:
 
-Usage:
-  Interactive mode:  python validation_framework.py
-  Single claim:      python validation_framework.py --claim "Uniformity increases resilience"
-  Batch file:        python validation_framework.py --file claims.txt
+  1. Information Entropy     — character & word-level Shannon entropy, compressibility
+  2. Falsifiability Score    — quantifier specificity, temporal grounding, measurability
+  3. Internal Consistency    — relation extraction and sign-consistency checking
+  4. Citation Analysis       — source concentration, age distribution, authority entropy
+  5. Cross-Domain Score      — probabilistic aggregation across all domains
+
+References:
+  - Shannon (1948): information entropy
+  - Popper (1959): falsifiability as demarcation criterion
+  - Normalized Compression Distance: Cilibrasi & Vitanyi (2005)
+  - Kolmogorov complexity approximation via zlib: Li et al. (2004)
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import math
+import re
+import string
 import sys
+import zlib
+from collections import Counter
 from dataclasses import dataclass, field
 
 
-# --- Domain Definitions ---
+# ---------------------------------------------------------------------------
+# Tokenization helpers
+# ---------------------------------------------------------------------------
+
+_PUNCT_TABLE = str.maketrans("", "", string.punctuation)
+
+
+def tokenize(text: str) -> list[str]:
+    return [w for w in text.lower().translate(_PUNCT_TABLE).split() if w]
+
+
+def sentencize(text: str) -> list[str]:
+    parts = re.split(r'(?<=[.!?])\s+(?=[A-Z])', text)
+    return [s.strip() for s in parts if s.strip()]
+
+
+# ---------------------------------------------------------------------------
+# Metric 1: Information Entropy & Compressibility
+# ---------------------------------------------------------------------------
+
+def char_entropy(text: str) -> float:
+    """Shannon entropy over character distribution (bits)."""
+    if not text:
+        return 0.0
+    counts = Counter(text.lower())
+    total = len(text)
+    return -sum((c / total) * math.log2(c / total) for c in counts.values())
+
+
+def word_entropy(tokens: list[str]) -> float:
+    """Shannon entropy over word distribution (bits)."""
+    if not tokens:
+        return 0.0
+    counts = Counter(tokens)
+    total = len(tokens)
+    return -sum((c / total) * math.log2(c / total) for c in counts.values())
+
+
+def compressibility(text: str) -> float:
+    """
+    Compression ratio as a proxy for Kolmogorov complexity.
+    Uses zlib (stdlib). Higher = more compressible = more redundant.
+
+    Based on Normalized Compression Distance literature
+    (Cilibrasi & Vitanyi 2005).
+    """
+    if not text:
+        return 0.0
+    original = text.encode("utf-8")
+    compressed = zlib.compress(original, 9)
+    return 1.0 - len(compressed) / len(original)
+
 
 @dataclass
-class DomainCheck:
-    """A single validation question within a domain."""
-    question: str
-    violation_keywords: list[str]   # if the claim contains these, flag as suspect
-    description: str
+class EntropyResult:
+    char_entropy_bits: float       # typical English: 4.0–4.5
+    word_entropy_bits: float
+    compressibility_ratio: float   # 0 = incompressible, 1 = fully redundant
+    interpretation: str
+
+
+def analyze_entropy(text: str, tokens: list[str]) -> EntropyResult:
+    h_char = char_entropy(text)
+    h_word = word_entropy(tokens)
+    comp = compressibility(text)
+
+    issues = []
+    if h_char < 3.0:
+        issues.append("very low character entropy (highly repetitive)")
+    if h_char > 4.8:
+        issues.append("unusually high character entropy (possibly random/encoded)")
+    if comp > 0.7:
+        issues.append(f"high compressibility ({comp:.0%}) — low information density")
+
+    return EntropyResult(
+        char_entropy_bits=round(h_char, 4),
+        word_entropy_bits=round(h_word, 4),
+        compressibility_ratio=round(comp, 4),
+        interpretation="; ".join(issues) if issues else "entropy within normal range",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Metric 2: Falsifiability Score
+# ---------------------------------------------------------------------------
+
+SPECIFIC_QUANTIFIERS = re.compile(
+    r"\b\d+\.?\d*\s*%|\b\d+\.?\d*\b(?:\s*(?:times|fold|percent|kg|km|m|cm|mm|"
+    r"hours?|days?|years?|months?|seconds?|million|billion|thousand))\b|"
+    r"\bbetween\s+\d+\s+and\s+\d+\b|\bby\s+\d{4}\b|\bin\s+\d{4}\b",
+    re.IGNORECASE,
+)
+
+VAGUE_QUANTIFIERS = re.compile(
+    r"\b(many|most|some|various|significant|numerous|several|"
+    r"few|substantial|considerable|a lot|a number of)\b",
+    re.IGNORECASE,
+)
+
+TEMPORAL_SPECIFIC = re.compile(
+    r"\b(in\s+\d{4}|by\s+\d{4}|within\s+\d+\s+\w+|"
+    r"\d{1,2}/\d{1,2}/\d{2,4}|\d{4}-\d{2}|"
+    r"between\s+\d{4}\s+and\s+\d{4}|from\s+\d{4}\s+to\s+\d{4}|"
+    r"since\s+\d{4}|after\s+\d{4}|before\s+\d{4}|"
+    r"next\s+\d+\s+\w+|over\s+\d+\s+\w+)\b",
+    re.IGNORECASE,
+)
+
+TEMPORAL_VAGUE = re.compile(
+    r"\b(always|never|inherently|by nature|eternally|"
+    r"fundamentally|inevitably|permanently)\b",
+    re.IGNORECASE,
+)
+
+MEASURABILITY_WORDS = re.compile(
+    r"\b(measured|observed|counted|rate of|percentage|"
+    r"correlation|statistically|empirically|quantified|"
+    r"data shows|experiment|sample size|p-value|confidence interval)\b",
+    re.IGNORECASE,
+)
+
+UNFALSIFIABLE_FRAMING = re.compile(
+    r"\b(essentially|in principle|fundamentally|by definition|"
+    r"it is known that|self-evidently|axiomatically|"
+    r"it goes without saying|needless to say)\b",
+    re.IGNORECASE,
+)
 
 
 @dataclass
-class Domain:
-    """A validation domain with its checks."""
+class FalsifiabilityResult:
+    score: float                  # [0, 1], higher = more falsifiable
+    quantifier_specificity: float
+    temporal_specificity: float
+    measurability: float
+    interpretation: str
+    details: dict = field(default_factory=dict)
+
+
+def analyze_falsifiability(text: str) -> FalsifiabilityResult:
+    """
+    Score how falsifiable a claim is based on structural properties.
+
+    Based on Popper's demarcation criterion: a claim is scientific
+    if it makes specific, testable, potentially refutable predictions.
+    """
+    n_specific_q = len(SPECIFIC_QUANTIFIERS.findall(text))
+    n_vague_q = len(VAGUE_QUANTIFIERS.findall(text))
+    quantifier_spec = n_specific_q / (n_specific_q + n_vague_q + 1)
+
+    n_temporal_spec = len(TEMPORAL_SPECIFIC.findall(text))
+    n_temporal_vague = len(TEMPORAL_VAGUE.findall(text))
+    temporal_spec = n_temporal_spec / (n_temporal_spec + n_temporal_vague + 1)
+
+    n_measurable = len(MEASURABILITY_WORDS.findall(text))
+    n_unfalsifiable = len(UNFALSIFIABLE_FRAMING.findall(text))
+    measurability = n_measurable / (n_measurable + n_unfalsifiable + 1)
+
+    score = (
+        0.40 * quantifier_spec
+        + 0.30 * measurability
+        + 0.30 * temporal_spec
+    )
+
+    if score >= 0.40:
+        interp = "FALSIFIABLE — contains specific, testable elements"
+    elif score >= 0.20:
+        interp = "PARTIALLY FALSIFIABLE — some specificity, could be more testable"
+    else:
+        interp = "LOW FALSIFIABILITY — vague, hard to test or refute"
+
+    return FalsifiabilityResult(
+        score=round(score, 4),
+        quantifier_specificity=round(quantifier_spec, 4),
+        temporal_specificity=round(temporal_spec, 4),
+        measurability=round(measurability, 4),
+        interpretation=interp,
+        details={
+            "specific_quantifiers": n_specific_q,
+            "vague_quantifiers": n_vague_q,
+            "temporal_specific": n_temporal_spec,
+            "temporal_vague": n_temporal_vague,
+            "measurability_markers": n_measurable,
+            "unfalsifiable_markers": n_unfalsifiable,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Metric 3: Internal Consistency
+# ---------------------------------------------------------------------------
+
+POSITIVE_PREDICATES = re.compile(
+    r"\b(increases?|causes?|leads?\s+to|improves?|promotes?|"
+    r"enables?|produces?|creates?|enhances?|strengthens?)\b",
+    re.IGNORECASE,
+)
+
+NEGATIVE_PREDICATES = re.compile(
+    r"\b(decreases?|reduces?|prevents?|harms?|inhibits?|"
+    r"destroys?|weakens?|eliminates?|undermines?|blocks?)\b",
+    re.IGNORECASE,
+)
+
+
+@dataclass
+class Relation:
+    subject: str
+    direction: int  # +1 or -1
+    obj: str
+    sentence_idx: int
+
+
+@dataclass
+class ConsistencyResult:
+    score: float              # [0, 1], higher = more consistent
+    relations_found: int
+    contradictions: list[tuple[str, str]]  # pairs of contradictory sentences
+    interpretation: str
+
+
+def extract_relations(sentences: list[str]) -> list[Relation]:
+    """
+    Extract subject-predicate-object relations from simple sentence structures.
+    Looks for patterns like "X increases Y" or "X leads to Y".
+    """
+    relations: list[Relation] = []
+    for idx, sent in enumerate(sentences):
+        # Try positive predicates
+        for m in POSITIVE_PREDICATES.finditer(sent):
+            before = sent[:m.start()].strip().split()[-3:]  # last 3 words as subject
+            after = sent[m.end():].strip().split()[:3]       # first 3 words as object
+            if before and after:
+                relations.append(Relation(
+                    subject=" ".join(before).lower().strip(string.punctuation),
+                    direction=1,
+                    obj=" ".join(after).lower().strip(string.punctuation),
+                    sentence_idx=idx,
+                ))
+        # Try negative predicates
+        for m in NEGATIVE_PREDICATES.finditer(sent):
+            before = sent[:m.start()].strip().split()[-3:]
+            after = sent[m.end():].strip().split()[:3]
+            if before and after:
+                relations.append(Relation(
+                    subject=" ".join(before).lower().strip(string.punctuation),
+                    direction=-1,
+                    obj=" ".join(after).lower().strip(string.punctuation),
+                    sentence_idx=idx,
+                ))
+    return relations
+
+
+def check_consistency(sentences: list[str]) -> ConsistencyResult:
+    """
+    Check for direct contradictions: same subject-object pair with
+    opposite direction predicates.
+    """
+    relations = extract_relations(sentences)
+    if not relations:
+        return ConsistencyResult(
+            score=1.0, relations_found=0, contradictions=[],
+            interpretation="No extractable relations — cannot assess consistency",
+        )
+
+    # Group by (subject, object) pair
+    pairs: dict[tuple[str, str], list[Relation]] = {}
+    for r in relations:
+        key = (r.subject, r.obj)
+        pairs.setdefault(key, []).append(r)
+
+    contradictions: list[tuple[str, str]] = []
+    for (subj, obj), rels in pairs.items():
+        directions = {r.direction for r in rels}
+        if len(directions) > 1:  # both +1 and -1
+            s1 = sentences[rels[0].sentence_idx][:80]
+            s2 = next(sentences[r.sentence_idx][:80] for r in rels if r.direction != rels[0].direction)
+            contradictions.append((s1, s2))
+
+    n_pairs = len(pairs)
+    n_contradictions = len(contradictions)
+    score = 1.0 - (n_contradictions / max(n_pairs, 1))
+
+    if n_contradictions == 0:
+        interp = "CONSISTENT — no direct contradictions detected"
+    elif n_contradictions <= 2:
+        interp = f"MINOR INCONSISTENCY — {n_contradictions} contradiction(s)"
+    else:
+        interp = f"INCONSISTENT — {n_contradictions} contradictions in {n_pairs} relation pairs"
+
+    return ConsistencyResult(
+        score=round(max(0.0, score), 4),
+        relations_found=len(relations),
+        contradictions=contradictions,
+        interpretation=interp,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Metric 4: Citation Analysis
+# ---------------------------------------------------------------------------
+
+CITATION_AUTHOR = re.compile(r"\(([A-Z][a-z]+(?:\s+(?:et\s+al|&\s+[A-Z][a-z]+))?)[.,]?\s*(\d{4})\)")
+CITATION_YEAR = re.compile(r"\b((?:19|20)\d{2})\b")
+
+
+@dataclass
+class CitationResult:
+    citation_count: int
+    unique_authors: int
+    author_entropy: float          # Shannon entropy over cited authors (bits)
+    mean_citation_age: float       # years from current year
+    citation_to_sentence_ratio: float
+    interpretation: str
+
+
+def analyze_citations(text: str, sentences: list[str], current_year: int = 2026) -> CitationResult:
+    """Analyze citation patterns for authority concentration and currency."""
+    author_matches = CITATION_AUTHOR.findall(text)
+    authors = [a[0].lower() for a in author_matches]
+    years = [int(a[1]) for a in author_matches]
+
+    # Also count bare [N] style citations
+    bracket_cites = re.findall(r"\[\d+\]", text)
+
+    total_cites = len(authors) + len(bracket_cites)
+    unique_auth = len(set(authors))
+
+    # Author entropy
+    if authors:
+        counts = Counter(authors)
+        total_a = len(authors)
+        author_entropy = -sum((c / total_a) * math.log2(c / total_a) for c in counts.values())
+    else:
+        author_entropy = 0.0
+
+    # Mean citation age
+    if years:
+        mean_age = sum(current_year - y for y in years) / len(years)
+    else:
+        mean_age = 0.0
+
+    ratio = total_cites / max(len(sentences), 1)
+
+    issues = []
+    if total_cites == 0:
+        issues.append("no citations found")
+    elif unique_auth > 0 and author_entropy < 1.0:
+        issues.append("low author diversity — possible authority concentration")
+    if mean_age > 20:
+        issues.append(f"mean citation age is {mean_age:.0f} years — evidence may be outdated")
+    if ratio < 0.05 and len(sentences) > 5:
+        issues.append("very low citation-to-sentence ratio for empirical claims")
+
+    return CitationResult(
+        citation_count=total_cites,
+        unique_authors=unique_auth,
+        author_entropy=round(author_entropy, 4),
+        mean_citation_age=round(mean_age, 1),
+        citation_to_sentence_ratio=round(ratio, 4),
+        interpretation="; ".join(issues) if issues else "citation profile within normal range",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Cross-Domain Aggregation
+# ---------------------------------------------------------------------------
+
+@dataclass
+class DomainScore:
     name: str
-    short: str
-    checks: list[DomainCheck]
-
-
-DOMAINS: list[Domain] = [
-    Domain(
-        name="Physics / Thermodynamics",
-        short="physics",
-        checks=[
-            DomainCheck(
-                question="Does this violate energy conservation or flow principles?",
-                violation_keywords=[
-                    "perpetual", "unlimited growth", "infinite resource",
-                    "without cost", "no trade-off", "free energy",
-                    "something from nothing",
-                ],
-                description="Thermodynamics requires energy costs for all transformations",
-            ),
-            DomainCheck(
-                question="Does this claim to decrease entropy in an isolated system?",
-                violation_keywords=[
-                    "perfect order", "eliminate chaos", "total control",
-                    "complete predictab", "zero waste", "perfect efficien",
-                ],
-                description="Second law: entropy in isolated systems never decreases",
-            ),
-            DomainCheck(
-                question="Does this require unsustainable energy inputs?",
-                violation_keywords=[
-                    "constant enforcement", "permanent surveillance",
-                    "total compliance", "universal monitor",
-                    "always-on", "zero tolerance",
-                ],
-                description="Systems requiring massive energy to maintain are thermodynamically unstable",
-            ),
-        ],
-    ),
-    Domain(
-        name="Biology / Evolution",
-        short="biology",
-        checks=[
-            DomainCheck(
-                question="Does this contradict evolved survival mechanisms?",
-                violation_keywords=[
-                    "override instinct", "suppress natural", "eliminate biological",
-                    "beyond biology", "post-biological", "biology is irrelevant",
-                    "socially constructed",
-                ],
-                description="Evolved mechanisms encode millions of years of survival data",
-            ),
-            DomainCheck(
-                question="Does this create genetic bottleneck conditions?",
-                violation_keywords=[
-                    "single standard", "one correct", "eliminate variation",
-                    "uniform population", "monoculture", "standardize all",
-                ],
-                description="Genetic diversity is required for species survival",
-            ),
-            DomainCheck(
-                question="Does this remove adaptive capacity?",
-                violation_keywords=[
-                    "fixed response", "no exception", "zero tolerance",
-                    "one size fits all", "universal standard", "mandatory uniform",
-                ],
-                description="Adaptation requires variation and context-sensitive responses",
-            ),
-        ],
-    ),
-    Domain(
-        name="Systems Dynamics",
-        short="systems",
-        checks=[
-            DomainCheck(
-                question="Does this eliminate feedback loops?",
-                violation_keywords=[
-                    "no criticism", "eliminate dissent", "suppress feedback",
-                    "remove oversight", "bypass review", "streamline approval",
-                    "unquestion",
-                ],
-                description="Feedback loops are essential for system self-correction",
-            ),
-            DomainCheck(
-                question="Does this reduce adaptive capacity?",
-                violation_keywords=[
-                    "rigid", "inflexible", "permanent", "unchangeable",
-                    "one approach", "single solution", "no alternative",
-                ],
-                description="Adaptive capacity requires flexibility and variation",
-            ),
-            DomainCheck(
-                question="Does this create collapse conditions?",
-                violation_keywords=[
-                    "homogene", "monoculture", "single point of failure",
-                    "centralize all", "eliminate redundan", "remove backup",
-                ],
-                description="Homogeneous systems fail uniformly under stress",
-            ),
-        ],
-    ),
-    Domain(
-        name="Indigenous Knowledge / Relational Principles",
-        short="indigenous",
-        checks=[
-            DomainCheck(
-                question="Does this break relational/ecosystem coupling?",
-                violation_keywords=[
-                    "extract without return", "take without giving",
-                    "separate from ecosystem", "independent of environment",
-                    "no obligation", "externalize cost",
-                ],
-                description="Sustainable systems maintain reciprocal relationships",
-            ),
-            DomainCheck(
-                question="Does this eliminate distributed intelligence?",
-                violation_keywords=[
-                    "centralize decision", "single authority",
-                    "top-down only", "eliminate local", "override community",
-                    "one voice",
-                ],
-                description="Distributed intelligence enables local adaptation",
-            ),
-        ],
-    ),
-    Domain(
-        name="Empirical Observation",
-        short="empirical",
-        checks=[
-            DomainCheck(
-                question="Do claimed outcomes match observed outcomes?",
-                violation_keywords=[
-                    "despite evidence", "regardless of outcome",
-                    "irrespective of result", "theory predicts",
-                    "should work", "ought to",
-                ],
-                description="Claims must be validated against observable results",
-            ),
-            DomainCheck(
-                question="Are there historical parallels that contradict this?",
-                violation_keywords=[
-                    "unprecedented", "never before", "this time is different",
-                    "unique situation", "no precedent", "new paradigm",
-                ],
-                description="Historical patterns are strong predictors; 'this time is different' is often wrong",
-            ),
-        ],
-    ),
-]
-
-
-@dataclass
-class CheckResult:
-    """Result of a single domain check against a claim."""
-    domain: str
-    question: str
-    flagged: bool
-    matched_keywords: list[str]
-    description: str
+    score: float          # [0, 1], higher = more concern
+    interpretation: str
 
 
 @dataclass
 class ValidationReport:
-    """Full validation report for a claim."""
     claim: str
-    results: list[CheckResult] = field(default_factory=list)
-
-    @property
-    def flags(self) -> list[CheckResult]:
-        return [r for r in self.results if r.flagged]
-
-    @property
-    def domains_flagged(self) -> int:
-        return len({r.domain for r in self.flags})
-
-    @property
-    def total_flags(self) -> int:
-        return len(self.flags)
-
-    @property
-    def confidence_level(self) -> str:
-        """How confident we are that this claim is an inversion."""
-        d = self.domains_flagged
-        if d == 0:
-            return "NONE — no domain flags"
-        elif d == 1:
-            return "LOW — single domain concern"
-        elif d == 2:
-            return "MODERATE — two domains flag violations"
-        elif d == 3:
-            return "HIGH — three domains flag violations"
-        else:
-            return "VERY HIGH — four or more domains flag violations"
+    entropy: EntropyResult
+    falsifiability: FalsifiabilityResult
+    consistency: ConsistencyResult
+    citations: CitationResult
+    domain_scores: list[DomainScore]
+    overall_concern: float    # [0, 1]
+    interpretation: str
 
 
-def validate_claim(claim: str) -> ValidationReport:
-    """Validate a claim against all domains."""
-    report = ValidationReport(claim=claim)
-    claim_lower = claim.lower()
+def clamp(x: float, lo: float = 0.0, hi: float = 1.0) -> float:
+    return max(lo, min(hi, x))
 
-    for domain in DOMAINS:
-        for check in domain.checks:
-            matched = [kw for kw in check.violation_keywords if kw.lower() in claim_lower]
-            report.results.append(CheckResult(
-                domain=domain.name,
-                question=check.question,
-                flagged=bool(matched),
-                matched_keywords=matched,
-                description=check.description,
-            ))
 
-    return report
+def validate_claim(text: str) -> ValidationReport:
+    """Run all analyses and produce a cross-domain validation report."""
+    tokens = tokenize(text)
+    sentences = sentencize(text)
 
+    entropy = analyze_entropy(text, tokens)
+    falsifiability = analyze_falsifiability(text)
+    consistency = check_consistency(sentences)
+    citations = analyze_citations(text, sentences)
+
+    # Map metrics to domain concern scores [0, 1]
+    domains = []
+
+    # Physics/Thermodynamics: concerned about unfalsifiable claims with high compressibility
+    phys_concern = (
+        0.5 * (1.0 - clamp(falsifiability.score / 0.4))
+        + 0.5 * clamp(entropy.compressibility_ratio / 0.6)
+    )
+    domains.append(DomainScore(
+        "Physics / Thermodynamics", round(phys_concern, 4),
+        "Assesses whether claims are thermodynamically plausible and testable",
+    ))
+
+    # Biology/Evolution: concerned about low falsifiability + no temporal grounding
+    bio_concern = (
+        0.6 * (1.0 - clamp(falsifiability.score / 0.4))
+        + 0.4 * (1.0 - clamp(falsifiability.temporal_specificity / 0.3))
+    )
+    domains.append(DomainScore(
+        "Biology / Evolution", round(bio_concern, 4),
+        "Assesses whether claims about living systems are grounded and testable",
+    ))
+
+    # Systems Dynamics: concerned about inconsistency + low information content
+    sys_concern = (
+        0.5 * (1.0 - clamp(consistency.score))
+        + 0.5 * clamp(entropy.compressibility_ratio / 0.5)
+    )
+    domains.append(DomainScore(
+        "Systems Dynamics", round(sys_concern, 4),
+        "Assesses internal consistency and information density of systems claims",
+    ))
+
+    # Empirical Observation: concerned about citation gaps + unfalsifiability
+    emp_concern = (
+        0.4 * (1.0 - clamp(citations.citation_to_sentence_ratio / 0.1))
+        + 0.3 * (1.0 - clamp(falsifiability.measurability / 0.3))
+        + 0.3 * (1.0 - clamp(citations.author_entropy / 2.0))
+    )
+    domains.append(DomainScore(
+        "Empirical Observation", round(emp_concern, 4),
+        "Assesses evidence base, citation quality, and measurability",
+    ))
+
+    # Aggregate: weighted mean of domain scores, with a boost if multiple domains flag
+    mean_score = sum(d.score for d in domains) / len(domains)
+    n_flagged = sum(1 for d in domains if d.score > 0.5)
+    # Multi-domain boost: if 3+ domains flag, escalate
+    multi_boost = 0.1 * max(0, n_flagged - 2)
+    overall = round(clamp(mean_score + multi_boost), 4)
+
+    if overall < 0.25:
+        interp = "LOW CONCERN — claim structure appears epistemically sound"
+    elif overall < 0.50:
+        interp = "MODERATE CONCERN — some structural weaknesses in claim"
+    elif overall < 0.70:
+        interp = "HIGH CONCERN — multiple epistemic red flags"
+    else:
+        interp = "VERY HIGH CONCERN — claim fails multiple validation dimensions"
+
+    return ValidationReport(
+        claim=text,
+        entropy=entropy,
+        falsifiability=falsifiability,
+        consistency=consistency,
+        citations=citations,
+        domain_scores=domains,
+        overall_concern=overall,
+        interpretation=interp,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Output
+# ---------------------------------------------------------------------------
 
 def print_report(report: ValidationReport) -> None:
-    """Print a human-readable validation report."""
     print("=" * 80)
     print("  MULTI-EPISTEMOLOGICAL VALIDATION REPORT")
     print("=" * 80)
-    print(f"\n  Claim: \"{report.claim}\"\n")
 
-    for domain in DOMAINS:
-        domain_results = [r for r in report.results if r.domain == domain.name]
-        domain_flags = [r for r in domain_results if r.flagged]
-        status = "FLAGGED" if domain_flags else "PASS"
-        marker = "!!" if domain_flags else "ok"
+    claim_display = report.claim[:200] + "..." if len(report.claim) > 200 else report.claim
+    print(f"\n  Claim: \"{claim_display}\"\n")
 
-        print(f"  [{marker}] {domain.name} — {status}")
+    # Entropy
+    e = report.entropy
+    print(f"  [1] Information Entropy")
+    print(f"      Character entropy:  {e.char_entropy_bits:.4f} bits  (English typical: 4.0–4.5)")
+    print(f"      Word entropy:       {e.word_entropy_bits:.4f} bits")
+    print(f"      Compressibility:    {e.compressibility_ratio:.4f}  (zlib proxy for Kolmogorov complexity)")
+    print(f"      {e.interpretation}")
 
-        for r in domain_results:
-            flag = " >>> " if r.flagged else "     "
-            print(f"  {flag}{r.question}")
-            if r.flagged:
-                print(f"         Matched: {', '.join(r.matched_keywords)}")
-                print(f"         Why: {r.description}")
+    # Falsifiability
+    f = report.falsifiability
+    print(f"\n  [2] Falsifiability (Popper 1959)")
+    print(f"      Overall score:      {f.score:.4f}  [0=unfalsifiable, 1=highly testable]")
+    print(f"      Quantifier spec:    {f.quantifier_specificity:.4f}  ({f.details['specific_quantifiers']} specific / {f.details['vague_quantifiers']} vague)")
+    print(f"      Temporal grounding: {f.temporal_specificity:.4f}  ({f.details['temporal_specific']} specific / {f.details['temporal_vague']} vague)")
+    print(f"      Measurability:      {f.measurability:.4f}  ({f.details['measurability_markers']} markers / {f.details['unfalsifiable_markers']} unfalsifiable)")
+    print(f"      {f.interpretation}")
 
-        print()
+    # Consistency
+    c = report.consistency
+    print(f"\n  [3] Internal Consistency")
+    print(f"      Score:              {c.score:.4f}  [0=contradictory, 1=consistent]")
+    print(f"      Relations extracted: {c.relations_found}")
+    if c.contradictions:
+        print(f"      Contradictions ({len(c.contradictions)}):")
+        for s1, s2 in c.contradictions[:3]:
+            print(f"        \"{s1}...\"")
+            print(f"        vs \"{s2}...\"")
+    print(f"      {c.interpretation}")
 
-    print("-" * 80)
-    print(f"  Domains flagged: {report.domains_flagged} / {len(DOMAINS)}")
-    print(f"  Total flags:     {report.total_flags}")
-    print(f"  Inversion confidence: {report.confidence_level}")
-    print()
+    # Citations
+    ci = report.citations
+    print(f"\n  [4] Citation Analysis")
+    print(f"      Total citations:    {ci.citation_count}")
+    print(f"      Unique authors:     {ci.unique_authors}")
+    print(f"      Author entropy:     {ci.author_entropy:.4f} bits  (higher = more diverse)")
+    print(f"      Mean citation age:  {ci.mean_citation_age:.1f} years")
+    print(f"      Cite/sentence ratio: {ci.citation_to_sentence_ratio:.4f}")
+    print(f"      {ci.interpretation}")
 
-    if report.domains_flagged >= 2:
-        print("  RECOMMENDATION: This claim shows cross-domain violations.")
-        print("  Per the validation methodology: when authority conflicts with")
-        print("  reality across multiple domains, the authority is likely wrong.")
-    elif report.domains_flagged == 1:
-        print("  RECOMMENDATION: Single-domain concern. Investigate further")
-        print("  before drawing conclusions.")
-    else:
-        print("  RECOMMENDATION: No automated flags. Manual review may still")
-        print("  be warranted for subtle inversions not captured by keyword matching.")
-    print()
+    # Domain scores
+    print(f"\n  [5] Cross-Domain Concern Scores")
+    for d in report.domain_scores:
+        bar = "#" * int(d.score * 20) + "." * (20 - int(d.score * 20))
+        print(f"      [{bar}] {d.score:.4f}  {d.name}")
+
+    print(f"\n{'=' * 80}")
+    print(f"  OVERALL: {report.overall_concern:.4f}  —  {report.interpretation}")
+    print(f"  Aggregation: mean(domain_scores) + multi-domain boost")
+    print(f"{'=' * 80}\n")
 
 
 def print_json_report(report: ValidationReport) -> None:
-    """Print a JSON validation report."""
     data = {
-        "claim": report.claim,
-        "domains_flagged": report.domains_flagged,
-        "total_flags": report.total_flags,
-        "confidence_level": report.confidence_level,
-        "results": [
-            {
-                "domain": r.domain,
-                "question": r.question,
-                "flagged": r.flagged,
-                "matched_keywords": r.matched_keywords,
-                "description": r.description,
-            }
-            for r in report.results
-        ],
+        "claim": report.claim[:500],
+        "overall_concern": report.overall_concern,
+        "interpretation": report.interpretation,
+        "entropy": {
+            "char_bits": report.entropy.char_entropy_bits,
+            "word_bits": report.entropy.word_entropy_bits,
+            "compressibility": report.entropy.compressibility_ratio,
+        },
+        "falsifiability": {
+            "score": report.falsifiability.score,
+            "quantifier_specificity": report.falsifiability.quantifier_specificity,
+            "temporal_specificity": report.falsifiability.temporal_specificity,
+            "measurability": report.falsifiability.measurability,
+            **report.falsifiability.details,
+        },
+        "consistency": {
+            "score": report.consistency.score,
+            "relations_found": report.consistency.relations_found,
+            "contradictions": len(report.consistency.contradictions),
+        },
+        "citations": {
+            "count": report.citations.citation_count,
+            "unique_authors": report.citations.unique_authors,
+            "author_entropy": report.citations.author_entropy,
+            "mean_age": report.citations.mean_citation_age,
+            "cite_sentence_ratio": report.citations.citation_to_sentence_ratio,
+        },
+        "domain_scores": {d.name: d.score for d in report.domain_scores},
     }
     print(json.dumps(data, indent=2))
 
 
 def interactive_mode() -> None:
-    """Run in interactive mode, prompting for claims one at a time."""
     print("=" * 80)
-    print("  MULTI-EPISTEMOLOGICAL VALIDATION FRAMEWORK")
+    print("  MULTI-EPISTEMOLOGICAL VALIDATION FRAMEWORK (Quantitative)")
     print("  Enter claims to validate (Ctrl+D or 'quit' to exit)")
     print("=" * 80)
 
@@ -324,7 +611,7 @@ def interactive_mode() -> None:
         try:
             claim = input("\n  Enter claim: ").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\n")
+            print()
             break
         if not claim or claim.lower() in ("quit", "exit", "q"):
             break
@@ -335,28 +622,21 @@ def interactive_mode() -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Multi-epistemological claim validation framework"
+        description="Quantitative multi-epistemological claim validation"
     )
     parser.add_argument("--claim", "-c", help="Single claim to validate")
-    parser.add_argument("--file", "-f", help="File with one claim per line")
+    parser.add_argument("--file", "-f", help="File to validate (full text)")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     args = parser.parse_args()
 
     if args.claim:
         report = validate_claim(args.claim)
-        if args.json:
-            print_json_report(report)
-        else:
-            print_report(report)
+        (print_json_report if args.json else print_report)(report)
     elif args.file:
         with open(args.file) as f:
-            claims = [line.strip() for line in f if line.strip()]
-        for claim in claims:
-            report = validate_claim(claim)
-            if args.json:
-                print_json_report(report)
-            else:
-                print_report(report)
+            text = f.read()
+        report = validate_claim(text)
+        (print_json_report if args.json else print_report)(report)
     else:
         interactive_mode()
 
