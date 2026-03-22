@@ -7,6 +7,7 @@ competition dynamics. Measures system state with established metrics:
 
   - Shannon Diversity Index:  H = -Σ pᵢ ln(pᵢ)
   - Pielou's Evenness:        E = H / ln(N)
+  - Entropy Production Rate:  dH/dt = ΔH / Δt (diversity change velocity)
   - Algebraic Connectivity:   λ₂ of the graph Laplacian (Fiedler value)
   - Living Species Count:     species with abundance above extinction threshold
 
@@ -19,6 +20,7 @@ References:
   - Pielou (1966): evenness index
   - Fiedler (1973): algebraic connectivity of graphs
   - May (1973): stability and complexity in model ecosystems
+  - Kondepudi & Prigogine (1998): entropy production in non-equilibrium systems
 """
 
 from __future__ import annotations
@@ -159,18 +161,21 @@ class EcosystemState:
     populations: list[float]
     shannon_diversity: float          # H = -Σ pᵢ ln(pᵢ)
     evenness: float                   # E = H / ln(N)
+    entropy_rate: float               # dH/dt = ΔH / Δt (nats per tick)
     algebraic_connectivity: float     # λ₂ (Fiedler value)
     living_species: int
     enforcement_level: float
     collapsed: bool
 
     def summary(self, compact: bool = False) -> str:
+        dh_sign = "+" if self.entropy_rate >= 0 else ""
         if compact:
             return (
                 f"t={self.tick:>4}  "
                 f"species={self.living_species:>2}  "
                 f"H={self.shannon_diversity:>5.3f}  "
                 f"E={self.evenness:>5.3f}  "
+                f"dH/dt={dh_sign}{self.entropy_rate:>7.4f}  "
                 f"λ₂={self.algebraic_connectivity:>6.4f}  "
                 f"enf={self.enforcement_level:.3f}"
                 f"{'  COLLAPSED' if self.collapsed else ''}"
@@ -181,6 +186,7 @@ class EcosystemState:
             f"pop=[{pop_str}]  "
             f"H={self.shannon_diversity:.3f}  "
             f"E={self.evenness:.3f}  "
+            f"dH/dt={dh_sign}{self.entropy_rate:.4f}  "
             f"λ₂={self.algebraic_connectivity:.4f}  "
             f"alive={self.living_species}  "
             f"enf={self.enforcement_level:.3f}"
@@ -236,10 +242,18 @@ def enforcement_level(tick: int, cfg: EcosystemConfig) -> float:
 
 
 def measure_state(
-    tick: int, populations: list[float], enf: float, cfg: EcosystemConfig
+    tick: int, populations: list[float], enf: float, cfg: EcosystemConfig,
+    prev_h: float = 0.0, dt: float = 1.0,
 ) -> EcosystemState:
-    """Compute all metrics for the current population state."""
+    """Compute all metrics for the current population state.
+
+    Entropy production rate dH/dt is the discrete derivative of Shannon
+    diversity with respect to simulation time. Sustained negative dH/dt
+    indicates irreversible diversity loss — the thermodynamic arrow
+    pointing toward system collapse (Kondepudi & Prigogine, 1998).
+    """
     h, e = shannon_diversity(populations)
+    entropy_rate = (h - prev_h) / dt if dt > 0 else 0.0
     living = sum(1 for x in populations if x > cfg.extinction_threshold)
     adj, n_alive = build_alive_adjacency(populations, cfg.extinction_threshold)
     lam2 = algebraic_connectivity(adj, n_alive)
@@ -249,6 +263,7 @@ def measure_state(
         populations=list(populations),
         shannon_diversity=h,
         evenness=e,
+        entropy_rate=entropy_rate,
         algebraic_connectivity=lam2,
         living_species=living,
         enforcement_level=enf,
@@ -288,15 +303,15 @@ def run_simulation(cfg: EcosystemConfig, quiet: bool = False) -> list[EcosystemS
     x = [ki * rng.uniform(0.7, 1.0) for ki in k]
 
     history: list[EcosystemState] = []
-    state = measure_state(0, x, 0.0, cfg)
+    state = measure_state(0, x, 0.0, cfg, prev_h=0.0, dt=cfg.dt)
     history.append(state)
 
     if not quiet:
-        print("=" * 90)
+        print("=" * 95)
         print("  LOTKA-VOLTERRA ECOSYSTEM SIMULATION")
         print(f"  {n} species, {cfg.ticks} ticks, dt={cfg.dt}")
         print(f"  Enforcement: max={cfg.enforcement_max}, onset=t{cfg.enforcement_onset}")
-        print("=" * 90)
+        print("=" * 95)
         print(state.summary(compact=True))
 
     for tick in range(1, cfg.ticks + 1):
@@ -326,7 +341,8 @@ def run_simulation(cfg: EcosystemConfig, quiet: bool = False) -> list[EcosystemS
             if x[i] < cfg.extinction_threshold:
                 x[i] = 0.0  # extinct
 
-        state = measure_state(tick, x, enf, cfg)
+        prev_h = history[-1].shannon_diversity
+        state = measure_state(tick, x, enf, cfg, prev_h=prev_h, dt=cfg.dt)
         history.append(state)
 
         if not quiet and (tick % 10 == 0 or state.collapsed):
@@ -347,7 +363,10 @@ def run_simulation(cfg: EcosystemConfig, quiet: bool = False) -> list[EcosystemS
     if not quiet and not state.collapsed:
         print(f"\n  Ecosystem survived {cfg.ticks} ticks.")
         final = history[-1]
+        min_dh = min(s.entropy_rate for s in history)
+        min_dh_tick = next(s.tick for s in history if s.entropy_rate == min_dh)
         print(f"  Shannon H={final.shannon_diversity:.4f}, Evenness={final.evenness:.4f}")
+        print(f"  dH/dt={final.entropy_rate:+.4f} (peak loss: {min_dh:.4f} at t={min_dh_tick})")
         print(f"  λ₂={final.algebraic_connectivity:.4f}, Living species={final.living_species}/{n}")
 
     return history
@@ -377,11 +396,17 @@ def run_comparison(cfg: EcosystemConfig) -> None:
         else:
             outcome = f"Survived {cfg.ticks} ticks"
 
+        # Compute peak entropy loss rate across the run
+        min_dh = min(s.entropy_rate for s in history)
+        min_dh_tick = next(s.tick for s in history if s.entropy_rate == min_dh)
+
+        dh_sign = "+" if final.entropy_rate >= 0 else ""
         print(f"\n  {name}")
         print(f"    Outcome: {outcome}")
         print(f"    Species alive: {final.living_species}/{cfg.n_species}")
         print(f"    Shannon H = {final.shannon_diversity:.4f}")
         print(f"    Evenness  = {final.evenness:.4f}")
+        print(f"    dH/dt     = {dh_sign}{final.entropy_rate:.4f}  (peak loss: {min_dh:.4f} at t={min_dh_tick})")
         print(f"    λ₂        = {final.algebraic_connectivity:.4f}")
 
     print()

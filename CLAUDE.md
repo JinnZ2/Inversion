@@ -28,7 +28,8 @@ All content lives in the root directory as Markdown files:
 ├── Meta-Framework-Note.md       # Meta-analysis on automated suppression and self-validating loops
 │
 ├── sims/
-│   └── systems_dynamics.py      # Feedback loop / homogeneity / collapse trajectory simulation
+│   ├── systems_dynamics.py      # Lotka-Volterra ecosystem collapse simulation
+│   └── dissipative_systems.py   # Prigogine dissipative structures / institutional thermodynamics
 ├── scripts/
 │   ├── contamination_detector.py  # Detect inversion patterns in text
 │   └── validation_framework.py    # Multi-epistemological claim validation
@@ -71,10 +72,18 @@ When working with this repository's content, the project's validation methodolog
 - All scripts support `--help` for full usage
 
 **Ecosystem Simulation** (`sims/systems_dynamics.py`):
-Lotka-Volterra competition dynamics with Shannon diversity, Pielou's evenness, and algebraic connectivity (Fiedler value). Models Gause competitive exclusion under enforced niche overlap.
+Lotka-Volterra competition dynamics with Shannon diversity, Pielou's evenness, entropy production rate (dH/dt), and algebraic connectivity (Fiedler value). Models Gause competitive exclusion under enforced niche overlap.
 ```
 python3 sims/systems_dynamics.py --compare              # three scenarios side-by-side
 python3 sims/systems_dynamics.py --ticks 500 --species 15 --enforcement-max 0.99
+```
+
+**Dissipative Systems Simulation** (`sims/dissipative_systems.py`):
+Prigogine non-equilibrium thermodynamics applied to institutional dynamics. Models institutions as open systems that maintain order (low entropy) through dissipation channels (transparency, accountability, feedback). Inversions block these channels, causing entropy accumulation and phase transitions (collapse). Tracks internal entropy S, entropy production rate σ, entropy export J_e, free energy F = Φ − T·S, and inter-institutional coupling.
+```
+python3 sims/dissipative_systems.py --compare           # three inversion scenarios
+python3 sims/dissipative_systems.py --institutions 8 --ticks 500 --inversion-rate 0.05
+python3 sims/dissipative_systems.py --json              # full history as JSON
 ```
 
 **Text Analysis** (`scripts/contamination_detector.py`):
