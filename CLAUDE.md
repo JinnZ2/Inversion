@@ -33,7 +33,10 @@ All content lives in the root directory as Markdown files:
 ├── scripts/
 │   ├── contamination_detector.py  # Detect inversion patterns in text
 │   ├── validation_framework.py    # Multi-epistemological claim validation
-│   └── fieldlink.py               # Bidirectional bridge to Emotions-as-Sensors repo
+│   ├── fieldlink.py               # Bidirectional bridge to Emotions-as-Sensors repo
+│   ├── field_system.py            # Rule-field engine for regenerative system tracking
+│   └── delusion_checker.py        # Detect systemic assumptions in AI datasets
+├── Md.md                          # Field system analysis and scenario comparisons
 │
 ├── LICENSE                      # CC0 1.0 Universal
 └── .well-known/
@@ -110,6 +113,22 @@ Bidirectional bridge between Inversion and [Emotions-as-Sensors](https://github.
 python3 scripts/fieldlink.py --export                    # export tier hierarchy as JSON
 python3 scripts/fieldlink.py --tiers                     # display tier hierarchy
 python3 scripts/fieldlink.py --import-sensors data.json --text "..."  # sensor-augmented analysis
+```
+
+**Field System** (`scripts/field_system.py`):
+Rule-field engine for regenerative system tracking. Models agricultural/ecological systems as thermodynamic entities with constraint layers (soil, water, energy, extraction), drift detection, ecological coupling amplification g(k) = 1 + α·k, effective yield calculation, and thermal limit checks. Includes Sovereign Steward vs Big Ag-Bot scenario comparison.
+```
+python3 scripts/field_system.py --compare               # steward vs ag-bot side-by-side
+python3 scripts/field_system.py --state scenario.json    # analyze custom state
+python3 scripts/field_system.py --compare --json         # JSON output
+```
+
+**Delusion Checker** (`scripts/delusion_checker.py`):
+Detects systemic assumptions in AI datasets and institutional text — hierarchy, corporation, efficiency, optimization, productivity, and economics patterns. Plausibility layer flags physically impossible claims (efficiency > 100%, profit absolutes, price-as-intrinsic).
+```
+python3 scripts/delusion_checker.py README.md            # analyze a file
+python3 scripts/delusion_checker.py --text "..." --json  # inline analysis
+python3 scripts/delusion_checker.py --dataset data.txt   # newline-separated entries
 ```
 
 ### No CI/CD pipeline
