@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Fieldlink — Bidirectional Bridge Between Inversion and Emotions-as-Sensors
+Fieldlink -- Bidirectional Bridge Between Inversion and Emotions-as-Sensors
 
 Connects two repositories in a closed validation loop:
 
@@ -15,7 +15,7 @@ Connects two repositories in a closed validation loop:
     suite results, and constraint agent corruption findings to augment
     contamination detection and claim validation with somatic/sensor data.
 
-The fieldlink operates on JSON interchange — each repo produces a
+The fieldlink operates on JSON interchange -- each repo produces a
 structured export that the other consumes. No shared runtime state;
 the coupling is through data contracts.
 
@@ -27,16 +27,16 @@ Tier Hierarchy (exported to ConstraintAgent):
 
 Integration Points:
   - contamination_detector.analyze() gains a sensor_coherence metric
-    when sensor atlas data is available — measures whether the text's
+    when sensor atlas data is available -- measures whether the text's
     epistemic signals align with somatic sensor expectations
   - validation_framework.validate_claim() gains a Somatic Alignment
-    domain score — cross-references constraint agent corruption
+    domain score -- cross-references constraint agent corruption
     findings against the claim's structural properties
 
 References:
   - Damasio (1994): somatic marker hypothesis
-  - Porges (2011): polyvagal theory — autonomic sensing
-  - Friston (2010): free energy principle — prediction error as signal
+  - Porges (2011): polyvagal theory -- autonomic sensing
+  - Friston (2010): free energy principle -- prediction error as signal
   - Prigogine (1967): dissipative structures and self-organization
 """
 
@@ -50,14 +50,14 @@ from dataclasses import dataclass, field
 
 
 # ---------------------------------------------------------------------------
-# Tier Hierarchy — Inversion's epistemic weighting system
+# Tier Hierarchy -- Inversion's epistemic weighting system
 # ---------------------------------------------------------------------------
 
 TIER_HIERARCHY = {
     1: {
         "name": "Physics / Thermodynamics",
         "weight": 1.00,
-        "description": "Fundamental physical constraints — conservation laws, "
+        "description": "Fundamental physical constraints -- conservation laws, "
                        "entropy, energy flow, thermodynamic limits",
         "validation": "Does it violate energy flow principles?",
         "examples": [
@@ -70,7 +70,7 @@ TIER_HIERARCHY = {
     2: {
         "name": "Biology / Evolution",
         "weight": 0.75,
-        "description": "Evolved survival mechanisms — somatic responses, "
+        "description": "Evolved survival mechanisms -- somatic responses, "
                        "autonomic regulation, biological imperatives",
         "validation": "Does it contradict evolved survival mechanisms?",
         "examples": [
@@ -83,7 +83,7 @@ TIER_HIERARCHY = {
     3: {
         "name": "Systems Dynamics",
         "weight": 0.50,
-        "description": "Feedback loop structures — adaptive capacity, "
+        "description": "Feedback loop structures -- adaptive capacity, "
                        "resilience, coupling, information flow",
         "validation": "Does it eliminate feedback loops or reduce adaptive capacity?",
         "examples": [
@@ -97,7 +97,7 @@ TIER_HIERARCHY = {
         "name": "Institutional Claims",
         "weight": 0.25,
         "description": "Policy assertions, regulatory frameworks, "
-                       "institutional narratives — lowest epistemic authority",
+                       "institutional narratives -- lowest epistemic authority",
         "validation": "Do outcomes match stated intentions?",
         "examples": [
             "Safety framework claims",
@@ -110,7 +110,7 @@ TIER_HIERARCHY = {
 
 
 # ---------------------------------------------------------------------------
-# Export structures — what Inversion sends to Emotions-as-Sensors
+# Export structures -- what Inversion sends to Emotions-as-Sensors
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -193,7 +193,7 @@ def export_to_json() -> str:
 
 
 # ---------------------------------------------------------------------------
-# Import structures — what Inversion receives from Emotions-as-Sensors
+# Import structures -- what Inversion receives from Emotions-as-Sensors
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -375,7 +375,7 @@ def compute_somatic_alignment(
     Based on Damasio's somatic marker hypothesis: the body's signals
     are evolutionarily calibrated detectors of environmental truth.
     Claims that systematically contradict somatic signals are
-    epistemically suspect — they require the organism to override
+    epistemically suspect -- they require the organism to override
     its own sensing apparatus (a Tier 2 violation).
     """
     text_lower = text.lower()
@@ -427,13 +427,13 @@ def compute_somatic_alignment(
     )
 
     if concern < 0.25:
-        interpretation = "ALIGNED — claim structure consistent with somatic sensing"
+        interpretation = "ALIGNED -- claim structure consistent with somatic sensing"
     elif concern < 0.50:
-        interpretation = "PARTIAL MISALIGNMENT — some somatic signal contradictions"
+        interpretation = "PARTIAL MISALIGNMENT -- some somatic signal contradictions"
     elif concern < 0.70:
-        interpretation = "MISALIGNED — claim contradicts multiple somatic signals"
+        interpretation = "MISALIGNED -- claim contradicts multiple somatic signals"
     else:
-        interpretation = "INVERTED — claim systematically opposes somatic sensing apparatus"
+        interpretation = "INVERTED -- claim systematically opposes somatic sensing apparatus"
 
     return {
         "concern": round(min(1.0, concern), 4),
@@ -490,7 +490,7 @@ def run_fieldlink(
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Fieldlink — bidirectional bridge between Inversion and "
+            "Fieldlink -- bidirectional bridge between Inversion and "
             "Emotions-as-Sensors. Exports tier hierarchy and validation "
             "methodology; imports sensor atlas and constraint agent findings "
             "for augmented contamination detection and claim validation."
@@ -520,7 +520,7 @@ def main() -> None:
 
     if args.tiers:
         print("=" * 70)
-        print("  INVERSION TIER HIERARCHY — Epistemic Weighting System")
+        print("  INVERSION TIER HIERARCHY -- Epistemic Weighting System")
         print("=" * 70)
         for tier_num, tier in sorted(TIER_HIERARCHY.items()):
             print(f"\n  Tier {tier_num} (weight {tier['weight']:.2f}): {tier['name']}")

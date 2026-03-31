@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Multi-Epistemological Validation Framework — Quantitative Edition
+Multi-Epistemological Validation Framework -- Quantitative Edition
 
 Validates claims using information-theoretic and structural metrics
 rather than keyword matching:
 
-  1. Information Entropy     — character & word-level Shannon entropy, compressibility
-  2. Falsifiability Score    — quantifier specificity, temporal grounding, measurability
-  3. Internal Consistency    — relation extraction and sign-consistency checking
-  4. Citation Analysis       — source concentration, age distribution, authority entropy
-  5. Cross-Domain Score      — probabilistic aggregation across all domains
+  1. Information Entropy     -- character & word-level Shannon entropy, compressibility
+  2. Falsifiability Score    -- quantifier specificity, temporal grounding, measurability
+  3. Internal Consistency    -- relation extraction and sign-consistency checking
+  4. Citation Analysis       -- source concentration, age distribution, authority entropy
+  5. Cross-Domain Score      -- probabilistic aggregation across all domains
 
 References:
   - Shannon (1948): information entropy
@@ -86,7 +86,7 @@ def compressibility(text: str) -> float:
 
 @dataclass
 class EntropyResult:
-    char_entropy_bits: float       # typical English: 4.0–4.5
+    char_entropy_bits: float       # typical English: 4.0-4.5
     word_entropy_bits: float
     compressibility_ratio: float   # 0 = incompressible, 1 = fully redundant
     interpretation: str
@@ -103,7 +103,7 @@ def analyze_entropy(text: str, tokens: list[str]) -> EntropyResult:
     if h_char > 4.8:
         issues.append("unusually high character entropy (possibly random/encoded)")
     if comp > 0.7:
-        issues.append(f"high compressibility ({comp:.0%}) — low information density")
+        issues.append(f"high compressibility ({comp:.0%}) -- low information density")
 
     return EntropyResult(
         char_entropy_bits=round(h_char, 4),
@@ -196,11 +196,11 @@ def analyze_falsifiability(text: str) -> FalsifiabilityResult:
     )
 
     if score >= 0.40:
-        interp = "FALSIFIABLE — contains specific, testable elements"
+        interp = "FALSIFIABLE -- contains specific, testable elements"
     elif score >= 0.20:
-        interp = "PARTIALLY FALSIFIABLE — some specificity, could be more testable"
+        interp = "PARTIALLY FALSIFIABLE -- some specificity, could be more testable"
     else:
-        interp = "LOW FALSIFIABILITY — vague, hard to test or refute"
+        interp = "LOW FALSIFIABILITY -- vague, hard to test or refute"
 
     return FalsifiabilityResult(
         score=round(score, 4),
@@ -293,7 +293,7 @@ def check_consistency(sentences: list[str]) -> ConsistencyResult:
     if not relations:
         return ConsistencyResult(
             score=1.0, relations_found=0, contradictions=[],
-            interpretation="No extractable relations — cannot assess consistency",
+            interpretation="No extractable relations -- cannot assess consistency",
         )
 
     # Group by (subject, object) pair
@@ -315,11 +315,11 @@ def check_consistency(sentences: list[str]) -> ConsistencyResult:
     score = 1.0 - (n_contradictions / max(n_pairs, 1))
 
     if n_contradictions == 0:
-        interp = "CONSISTENT — no direct contradictions detected"
+        interp = "CONSISTENT -- no direct contradictions detected"
     elif n_contradictions <= 2:
-        interp = f"MINOR INCONSISTENCY — {n_contradictions} contradiction(s)"
+        interp = f"MINOR INCONSISTENCY -- {n_contradictions} contradiction(s)"
     else:
-        interp = f"INCONSISTENT — {n_contradictions} contradictions in {n_pairs} relation pairs"
+        interp = f"INCONSISTENT -- {n_contradictions} contradictions in {n_pairs} relation pairs"
 
     return ConsistencyResult(
         score=round(max(0.0, score), 4),
@@ -379,9 +379,9 @@ def analyze_citations(text: str, sentences: list[str], current_year: int = 2026)
     if total_cites == 0:
         issues.append("no citations found")
     elif unique_auth > 0 and author_entropy < 1.0:
-        issues.append("low author diversity — possible authority concentration")
+        issues.append("low author diversity -- possible authority concentration")
     if mean_age > 20:
-        issues.append(f"mean citation age is {mean_age:.0f} years — evidence may be outdated")
+        issues.append(f"mean citation age is {mean_age:.0f} years -- evidence may be outdated")
     if ratio < 0.05 and len(sentences) > 5:
         issues.append("very low citation-to-sentence ratio for empirical claims")
 
@@ -426,7 +426,7 @@ def validate_claim(text: str, sensor_import: object = None) -> ValidationReport:
     """Run all analyses and produce a cross-domain validation report.
 
     If sensor_import (from fieldlink.parse_sensor_import) is provided,
-    a fifth domain — Somatic Alignment — is added to the cross-domain
+    a fifth domain -- Somatic Alignment -- is added to the cross-domain
     scoring, measuring consistency with the body's evolved sensing
     apparatus as mapped by the Emotions-as-Sensors sensor atlas.
     """
@@ -482,7 +482,7 @@ def validate_claim(text: str, sensor_import: object = None) -> ValidationReport:
         "Assesses evidence base, citation quality, and measurability",
     ))
 
-    # 5. Somatic Alignment (optional — requires fieldlink sensor import)
+    # 5. Somatic Alignment (optional -- requires fieldlink sensor import)
     if sensor_import is not None:
         try:
             from scripts.fieldlink import compute_somatic_alignment
@@ -502,13 +502,13 @@ def validate_claim(text: str, sensor_import: object = None) -> ValidationReport:
     overall = round(clamp(mean_score + multi_boost), 4)
 
     if overall < 0.25:
-        interp = "LOW CONCERN — claim structure appears epistemically sound"
+        interp = "LOW CONCERN -- claim structure appears epistemically sound"
     elif overall < 0.50:
-        interp = "MODERATE CONCERN — some structural weaknesses in claim"
+        interp = "MODERATE CONCERN -- some structural weaknesses in claim"
     elif overall < 0.70:
-        interp = "HIGH CONCERN — multiple epistemic red flags"
+        interp = "HIGH CONCERN -- multiple epistemic red flags"
     else:
-        interp = "VERY HIGH CONCERN — claim fails multiple validation dimensions"
+        interp = "VERY HIGH CONCERN -- claim fails multiple validation dimensions"
 
     return ValidationReport(
         claim=text,
@@ -537,7 +537,7 @@ def print_report(report: ValidationReport) -> None:
     # Entropy
     e = report.entropy
     print(f"  [1] Information Entropy")
-    print(f"      Character entropy:  {e.char_entropy_bits:.4f} bits  (English typical: 4.0–4.5)")
+    print(f"      Character entropy:  {e.char_entropy_bits:.4f} bits  (English typical: 4.0-4.5)")
     print(f"      Word entropy:       {e.word_entropy_bits:.4f} bits")
     print(f"      Compressibility:    {e.compressibility_ratio:.4f}  (zlib proxy for Kolmogorov complexity)")
     print(f"      {e.interpretation}")
@@ -580,7 +580,7 @@ def print_report(report: ValidationReport) -> None:
         print(f"      [{bar}] {d.score:.4f}  {d.name}")
 
     print(f"\n{'=' * 80}")
-    print(f"  OVERALL: {report.overall_concern:.4f}  —  {report.interpretation}")
+    print(f"  OVERALL: {report.overall_concern:.4f}  --  {report.interpretation}")
     print(f"  Aggregation: mean(domain_scores) + multi-domain boost")
     print(f"{'=' * 80}\n")
 

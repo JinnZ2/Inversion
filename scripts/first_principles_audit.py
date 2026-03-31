@@ -32,7 +32,7 @@
 
 # report = audit_function(my_function, params, ranges)
 
-# generate_report(report, format=“markdown”, filepath=“audit.md”)
+# generate_report(report, format="markdown", filepath="audit.md")
 
 import inspect
 import json
@@ -48,26 +48,26 @@ from io import StringIO
 
 # =========================================================================
 
-# DEFINE — Parameter Documentation
+# DEFINE -- Parameter Documentation
 
 # =========================================================================
 
 @dataclass
 class ParameterSpec:
-“””
+"""
 Complete specification of a single parameter.
 Forces explicit documentation of physical meaning,
 source, units, and valid range.
-“””
+"""
 name: str
 default_value: float
-units: str = “”
-physical_meaning: str = “”
-source: str = “”               # “measured”, “derived”, “assumed”, “literature”
+units: str = ""
+physical_meaning: str = ""
+source: str = ""               # "measured", "derived", "assumed", "literature"
 valid_min: Optional[float] = None
 valid_max: Optional[float] = None
-uncertainty: Optional[float] = None   # ± value or % if source is “measured”
-notes: str = “”
+uncertainty: Optional[float] = None   # ± value or % if source is "measured"
+notes: str = ""
 
 ```
 def is_documented(self) -> bool:
@@ -83,27 +83,27 @@ def is_within_range(self, value: float) -> bool:
 
 @dataclass
 class AssumptionRecord:
-“”“An explicit assumption made by the model.”””
+"""An explicit assumption made by the model."""
 name: str
 description: str
-basis: str                     # “physics”, “empirical”, “convention”, “simplification”
+basis: str                     # "physics", "empirical", "convention", "simplification"
 falsifiable: bool = True
-falsification_test: str = “”   # how to check if this assumption is wrong
-impact_if_wrong: str = “”      # what breaks
+falsification_test: str = ""   # how to check if this assumption is wrong
+impact_if_wrong: str = ""      # what breaks
 
 # =========================================================================
 
-# MEASURE — Extract and Catalog
+# MEASURE -- Extract and Catalog
 
 # =========================================================================
 
 def extract_function_signature(func: Callable) -> Dict[str, Any]:
-“””
+"""
 Extract parameter names, defaults, and docstring from a function.
-“””
+"""
 sig = inspect.signature(func)
-doc = inspect.getdoc(func) or “”
-source_lines = “”
+doc = inspect.getdoc(func) or ""
+source_lines = ""
 try:
 source_lines = inspect.getsource(func)
 except (OSError, TypeError):
@@ -133,10 +133,10 @@ def catalog_parameters(
 func: Callable,
 specs: Optional[Dict[str, ParameterSpec]] = None,
 ) -> Dict[str, Any]:
-“””
+"""
 Catalog all parameters with documentation status.
 specs: user-provided ParameterSpec for each parameter.
-“””
+"""
 sig_info = extract_function_signature(func)
 catalog = []
 
@@ -176,7 +176,7 @@ return {
 
 # =========================================================================
 
-# ANALYZE — Sensitivity Analysis
+# ANALYZE -- Sensitivity Analysis
 
 # =========================================================================
 
@@ -187,7 +187,7 @@ param_ranges: Dict[str, Tuple[float, float]],
 output_key: Optional[str] = None,
 n_steps: int = 10,
 ) -> Dict[str, Any]:
-“””
+"""
 One-at-a-time sensitivity analysis.
 Vary each parameter across its range while holding others at baseline.
 
@@ -297,7 +297,7 @@ return {
 
 # =========================================================================
 
-# IMPROVE — Boundary Conditions and FMEA
+# IMPROVE -- Boundary Conditions and FMEA
 
 # =========================================================================
 
@@ -307,10 +307,10 @@ base_params: Dict[str, float],
 param_ranges: Dict[str, Tuple[float, float]],
 output_key: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-“””
+"""
 Test function at boundary values (min, max, zero, negative, extreme).
 Identifies where the model breaks.
-“””
+"""
 def _safe_call(params):
 try:
 result = func(**params)
@@ -318,7 +318,7 @@ if isinstance(result, dict) and output_key:
 return result.get(output_key, result)
 return result
 except Exception as e:
-return {“error”: str(e)}
+return {"error": str(e)}
 
 ```
 tests = []
@@ -364,7 +364,7 @@ def generate_fmea(
 parameters: List[ParameterSpec],
 assumptions: List[AssumptionRecord],
 ) -> List[Dict[str, Any]]:
-“””
+"""
 Failure Mode and Effects Analysis.
 For each parameter and assumption, document:
 - What could go wrong
@@ -372,7 +372,7 @@ For each parameter and assumption, document:
 - How likely it is
 - How detectable it is
 - Risk Priority Number (RPN)
-“””
+"""
 fmea = []
 
 ```
@@ -438,7 +438,7 @@ return fmea
 
 # =========================================================================
 
-# CONTROL — Capability Indices and Control Limits
+# CONTROL -- Capability Indices and Control Limits
 
 # =========================================================================
 
@@ -448,7 +448,7 @@ lower_spec: Optional[float] = None,
 upper_spec: Optional[float] = None,
 target: Optional[float] = None,
 ) -> Dict[str, Any]:
-“””
+"""
 Compute process capability indices (Cp, Cpk, Pp, Ppk).
 
 ```
@@ -505,7 +505,7 @@ if std > 0:
         z_lower = (mean - lower_spec) / std
         result["z_lower"] = round(z_lower, 4)
 else:
-    result["note"] = "Zero variance — all outputs identical"
+    result["note"] = "Zero variance -- all outputs identical"
 
 return result
 ```
@@ -519,7 +519,7 @@ lower_spec: Optional[float] = None,
 upper_spec: Optional[float] = None,
 seed: Optional[int] = 42,
 ) -> Dict[str, Any]:
-“””
+"""
 Monte Carlo simulation for capability analysis.
 Sample parameters from uniform distributions, run function,
 collect outputs, compute capability indices.
@@ -586,7 +586,7 @@ upper_spec: Optional[float] = None,
 n_sensitivity_steps: int = 10,
 n_monte_carlo: int = 1000,
 ) -> Dict[str, Any]:
-“””
+"""
 Complete Six Sigma audit of a function.
 
 ```
@@ -674,7 +674,7 @@ return {
 ```
 
 def _grade(catalog, boundary_failures, mc) -> str:
-“”“Simple overall grade based on audit results.”””
+"""Simple overall grade based on audit results."""
 score = 0
 
 ```
@@ -704,13 +704,13 @@ elif cpk is not None and cpk >= 1.0:
     score += 1
 
 if score >= 9:
-    return "A — Production ready"
+    return "A -- Production ready"
 elif score >= 6:
-    return "B — Usable with caveats"
+    return "B -- Usable with caveats"
 elif score >= 3:
-    return "C — Needs improvement"
+    return "C -- Needs improvement"
 else:
-    return "D — Not validated"
+    return "D -- Not validated"
 ```
 
 # =========================================================================
@@ -721,10 +721,10 @@ else:
 
 def generate_report(
 audit_result: Dict[str, Any],
-fmt: str = “markdown”,
+fmt: str = "markdown",
 filepath: Optional[str] = None,
 ) -> str:
-“””
+"""
 Generate audit report in markdown, JSON, or CSV.
 
 ```
@@ -772,7 +772,7 @@ if s.get("Cpk") is not None:
 a("")
 
 # Define
-a("## Define — Parameters\n")
+a("## Define -- Parameters\n")
 params = r["define"]["parameters"]["parameters"]
 a("| Parameter | Default | Units | Source | Documented |")
 a("|-----------|---------|-------|--------|------------|")
@@ -782,7 +782,7 @@ for p in params:
 a("")
 
 if r["define"]["assumptions"]:
-    a("## Define — Assumptions\n")
+    a("## Define -- Assumptions\n")
     for ass in r["define"]["assumptions"]:
         a(f"- **{ass['name']}**: {ass['description']}")
         a(f"  - Basis: {ass['basis']}")
@@ -792,7 +792,7 @@ if r["define"]["assumptions"]:
     a("")
 
 # Analyze
-a("## Analyze — Sensitivity Ranking\n")
+a("## Analyze -- Sensitivity Ranking\n")
 a("| Rank | Parameter | Sensitivity Coefficient |")
 a("|------|-----------|------------------------|")
 for item in r["analyze"]["pareto_ranking"]:
@@ -800,7 +800,7 @@ for item in r["analyze"]["pareto_ranking"]:
 a("")
 
 # Improve
-a("## Improve — Boundary Failures\n")
+a("## Improve -- Boundary Failures\n")
 bf = r["improve"]["boundary_failure_details"]
 if bf:
     a("| Parameter | Boundary | Value | Error |")
@@ -812,7 +812,7 @@ else:
 a("")
 
 if r["improve"]["fmea"]:
-    a("## Improve — FMEA (Top 5 by RPN)\n")
+    a("## Improve -- FMEA (Top 5 by RPN)\n")
     a("| Item | Type | RPN | Severity | Occurrence | Detection | Recommendation |")
     a("|------|------|-----|----------|------------|-----------|----------------|")
     for item in r["improve"]["fmea"][:5]:
@@ -821,7 +821,7 @@ a("")
 
 # Control
 mc = r["control"]["monte_carlo"]
-a("## Control — Monte Carlo Capability\n")
+a("## Control -- Monte Carlo Capability\n")
 a(f"| Metric | Value |")
 a(f"|--------|-------|")
 a(f"| Samples | {mc.get('n', 'N/A')} |")
@@ -842,7 +842,7 @@ return "\n".join(lines)
 ```
 
 def _to_csv(r: Dict) -> str:
-“”“Flatten audit to CSV rows.”””
+"""Flatten audit to CSV rows."""
 buf = StringIO()
 writer = csv.writer(buf)
 
@@ -878,15 +878,15 @@ return buf.getvalue()
 
 # =========================================================================
 
-# LAYER 2 — BIAS DETECTION AND DESIGN CHOICE ACCOUNTABILITY
+# LAYER 2 -- BIAS DETECTION AND DESIGN CHOICE ACCOUNTABILITY
 
 # =========================================================================
 
 # 
 
-# Layer 1 audits the mechanics: “Does this code work correctly?”
+# Layer 1 audits the mechanics: "Does this code work correctly?"
 
-# Layer 2 audits the choices: “Why was this code written THIS way?”
+# Layer 2 audits the choices: "Why was this code written THIS way?"
 
 # 
 
@@ -894,113 +894,113 @@ return buf.getvalue()
 
 # and AI bias (optimization tendency, recency weighting, complexity preference).
 
-# —————————
+# ------------------
 
 # Known Bias Patterns
 
-# —————————
+# ------------------
 
 KNOWN_BIAS_PATTERNS = {
-“optimization_bias”: {
-“description”: “Tendency to frame all systems as optimization problems”,
-“indicators”: [
-“Single objective function without constraints”,
-“Parameters chosen to maximize one output”,
-“No accounting for what is sacrificed”,
+"optimization_bias": {
+"description": "Tendency to frame all systems as optimization problems",
+"indicators": [
+"Single objective function without constraints",
+"Parameters chosen to maximize one output",
+"No accounting for what is sacrificed",
 ],
-“common_in”: [“AI models”, “economics”, “industrial engineering”],
+"common_in": ["AI models", "economics", "industrial engineering"],
 },
-“recency_bias”: {
-“description”: “Over-weighting recent data or methods over established physics”,
-“indicators”: [
-“Default values from recent papers only”,
-“No comparison to long-term baselines”,
-“Ignoring pre-industrial or indigenous approaches”,
+"recency_bias": {
+"description": "Over-weighting recent data or methods over established physics",
+"indicators": [
+"Default values from recent papers only",
+"No comparison to long-term baselines",
+"Ignoring pre-industrial or indigenous approaches",
 ],
-“common_in”: [“AI models”, “policy analysis”],
+"common_in": ["AI models", "policy analysis"],
 },
-“complexity_bias”: {
-“description”: “Preferring complex models when simpler ones explain the data”,
-“indicators”: [
-“More parameters than the system requires”,
-“Nested functions without clear physical justification”,
-“Sensitivity analysis shows most parameters don’t matter”,
+"complexity_bias": {
+"description": "Preferring complex models when simpler ones explain the data",
+"indicators": [
+"More parameters than the system requires",
+"Nested functions without clear physical justification",
+"Sensitivity analysis shows most parameters don't matter",
 ],
-“common_in”: [“AI models”, “academic research”],
+"common_in": ["AI models", "academic research"],
 },
-“simplification_bias”: {
-“description”: “Dropping terms that are inconvenient to model”,
-“indicators”: [
-“Externalized costs set to zero”,
-“Long-term feedback loops omitted”,
-“Coupling terms between subsystems missing”,
+"simplification_bias": {
+"description": "Dropping terms that are inconvenient to model",
+"indicators": [
+"Externalized costs set to zero",
+"Long-term feedback loops omitted",
+"Coupling terms between subsystems missing",
 ],
-“common_in”: [“industrial models”, “economic models”],
+"common_in": ["industrial models", "economic models"],
 },
-“linearity_bias”: {
-“description”: “Assuming linear relationships where nonlinear dynamics exist”,
-“indicators”: [
-“All rates are constant”,
-“No threshold or saturation effects”,
-“No feedback between state variables”,
+"linearity_bias": {
+"description": "Assuming linear relationships where nonlinear dynamics exist",
+"indicators": [
+"All rates are constant",
+"No threshold or saturation effects",
+"No feedback between state variables",
 ],
-“common_in”: [“AI models”, “spreadsheet analysis”],
+"common_in": ["AI models", "spreadsheet analysis"],
 },
-“survivorship_bias”: {
-“description”: “Training on successful systems, ignoring failed ones”,
-“indicators”: [
-“Default parameters reflect ‘best case’”,
-“No failure mode in the model”,
-“Validation only against working examples”,
+"survivorship_bias": {
+"description": "Training on successful systems, ignoring failed ones",
+"indicators": [
+"Default parameters reflect 'best case'",
+"No failure mode in the model",
+"Validation only against working examples",
 ],
-“common_in”: [“AI models”, “business analysis”],
+"common_in": ["AI models", "business analysis"],
 },
-“scale_bias”: {
-“description”: “Assuming results at one scale apply at another”,
-“indicators”: [
-“No scale parameter in the model”,
-“Same equations for lab and field”,
-“No spatial or temporal resolution check”,
+"scale_bias": {
+"description": "Assuming results at one scale apply at another",
+"indicators": [
+"No scale parameter in the model",
+"Same equations for lab and field",
+"No spatial or temporal resolution check",
 ],
-“common_in”: [“AI models”, “engineering extrapolation”],
+"common_in": ["AI models", "engineering extrapolation"],
 },
-“externalization_bias”: {
-“description”: “Omitting costs borne by parties outside the model boundary”,
-“indicators”: [
-“No pollution, waste, or degradation terms”,
-“Efficiency calculated without full lifecycle”,
-“System boundary excludes downstream effects”,
+"externalization_bias": {
+"description": "Omitting costs borne by parties outside the model boundary",
+"indicators": [
+"No pollution, waste, or degradation terms",
+"Efficiency calculated without full lifecycle",
+"System boundary excludes downstream effects",
 ],
-“common_in”: [“industrial models”, “economic models”, “AI trained on corporate data”],
+"common_in": ["industrial models", "economic models", "AI trained on corporate data"],
 },
 }
 
-# —————————
+# ------------------
 
 # Design Choice Record
 
-# —————————
+# ------------------
 
 @dataclass
 class DesignChoice:
-“””
+"""
 Documents a specific modeling decision.
 Forces the modeler to state what alternatives existed
 and why this one was chosen.
-“””
-name: str                          # e.g., “responsiveness_degradation_form”
-chosen: str                        # e.g., “dR = -k1*signal + k2*(1-R)”
+"""
+name: str                          # e.g., "responsiveness_degradation_form"
+chosen: str                        # e.g., "dR = -k1*signal + k2*(1-R)"
 alternatives: List[str]            # what else could have been used
 reason: str                        # why this one was picked
 bias_risk: List[str]               # which bias patterns this choice is susceptible to
-impact_on_output: str = “”         # how this choice shapes results
-who_decided: str = “”              # “human”, “AI:claude”, “AI:gemini”, “literature”
+impact_on_output: str = ""         # how this choice shapes results
+who_decided: str = ""              # "human", "AI:claude", "AI:gemini", "literature"
 
-# —————————
+# ------------------
 
 # Bias Flag Engine
 
-# —————————
+# ------------------
 
 def flag_biases(
 specs: List[ParameterSpec],
@@ -1008,7 +1008,7 @@ assumptions: List[AssumptionRecord],
 design_choices: List[DesignChoice],
 sensitivity_result: Optional[Dict] = None,
 ) -> List[Dict[str, Any]]:
-“””
+"""
 Scan parameters, assumptions, and design choices for known bias patterns.
 
 ```
@@ -1030,7 +1030,7 @@ all_derived = all(s.source == "derived" for s in specs if s.source)
 if all_derived and len(specs) > 3:
     flags.append({
         "bias": "complexity_bias",
-        "evidence": "All parameters derived — no direct measurements anchor the model",
+        "evidence": "All parameters derived -- no direct measurements anchor the model",
         "severity": "medium",
         "recommendation": "Include at least one directly measured parameter as ground truth",
     })
@@ -1069,7 +1069,7 @@ for dc in design_choices:
     if not dc.alternatives:
         flags.append({
             "bias": "optimization_bias",
-            "evidence": f"Design choice '{dc.name}' lists no alternatives — was only one option considered?",
+            "evidence": f"Design choice '{dc.name}' lists no alternatives -- was only one option considered?",
             "severity": "high",
             "recommendation": "Document at least 2 alternative formulations",
         })
@@ -1093,7 +1093,7 @@ if sensitivity_result:
         if len(low_impact) > len(pareto) * 0.5:
             flags.append({
                 "bias": "complexity_bias",
-                "evidence": f"{len(low_impact)}/{len(pareto)} parameters have sensitivity < 0.05 — model may be over-parameterized",
+                "evidence": f"{len(low_impact)}/{len(pareto)} parameters have sensitivity < 0.05 -- model may be over-parameterized",
                 "severity": "medium",
                 "recommendation": "Consider removing or fixing low-impact parameters",
             })
@@ -1132,11 +1132,11 @@ flags.sort(key=lambda f: severity_order.get(f.get("severity", "low"), 3))
 return flags
 ```
 
-# —————————
+# ------------------
 
 # Formulation Comparison
 
-# —————————
+# ------------------
 
 def compare_formulations(
 formulations: Dict[str, Callable],
@@ -1148,7 +1148,7 @@ lower_spec: Optional[float] = None,
 upper_spec: Optional[float] = None,
 seed: int = 42,
 ) -> Dict[str, Any]:
-“””
+"""
 Run the same audit on multiple alternative formulations
 and compare their outputs.
 
@@ -1218,18 +1218,18 @@ return {
         "dominant_agreement": dominant_agreement,
     },
     "recommendation": (
-        "Formulations agree — choice has low impact"
+        "Formulations agree -- choice has low impact"
         if divergence_ratio < 0.1 and dominant_agreement
-        else "Formulations diverge — design choice significantly affects results"
+        else "Formulations diverge -- design choice significantly affects results"
     ),
 }
 ```
 
-# —————————
+# ------------------
 
 # Extended Audit (Layer 1 + Layer 2)
 
-# —————————
+# ------------------
 
 def full_audit(
 func: Callable,
@@ -1245,9 +1245,9 @@ upper_spec: Optional[float] = None,
 n_sensitivity_steps: int = 10,
 n_monte_carlo: int = 1000,
 ) -> Dict[str, Any]:
-“””
+"""
 Complete audit: Layer 1 (mechanics) + Layer 2 (bias/design choices).
-“””
+"""
 # Layer 1
 layer1 = audit_function(
 func, base_params, param_ranges,
@@ -1310,13 +1310,13 @@ layer1["bias_detection"] = {
 # Update grade to account for bias
 high_bias = len([f for f in bias_flags if f.get("severity") == "high"])
 if high_bias >= 3:
-    layer1["summary"]["bias_grade"] = "FAIL — Multiple high-severity biases detected"
+    layer1["summary"]["bias_grade"] = "FAIL -- Multiple high-severity biases detected"
 elif high_bias >= 1:
-    layer1["summary"]["bias_grade"] = "WARNING — High-severity bias detected"
+    layer1["summary"]["bias_grade"] = "WARNING -- High-severity bias detected"
 elif bias_flags:
-    layer1["summary"]["bias_grade"] = "CAUTION — Medium-severity biases present"
+    layer1["summary"]["bias_grade"] = "CAUTION -- Medium-severity biases present"
 else:
-    layer1["summary"]["bias_grade"] = "PASS — No significant biases detected"
+    layer1["summary"]["bias_grade"] = "PASS -- No significant biases detected"
 
 return layer1
 ```

@@ -1,6 +1,27 @@
-# geometric_audit_complete.py
-# Complete Audit: Layer 1 (Mechanics) + Layer 2 (Bias/Design Choices)
-# The first framework that audits not just correctness, but erasure
+#!/usr/bin/env python3
+"""Geometric audit framework for detecting bias and erasure in computational models.
+
+Implements a two-layer audit: Layer 1 checks mechanical correctness (baseline
+output, sensitivity, uncertainty); Layer 2 detects systemic biases and
+undocumented design choices.  Scans parameter specifications, assumptions, and
+design choices against a catalogue of 13 known bias patterns (externalization,
+coupling, temporal, measurement, linearity, etc.) and grades overall model
+integrity.
+
+Methodology
+-----------
+- Bias catalogue derived from philosophy-of-science literature on model
+  under-determination (Duhem-Quine) and value-laden design choices
+  (Douglas 2009, "Science, Policy, and the Value-Free Ideal").
+- Sensitivity and formulation comparison follow Saltelli et al. (2008),
+  "Global Sensitivity Analysis: The Primer".
+- Integrity score combines high/medium severity counts into a 0-1 grade.
+
+References
+----------
+Douglas, H. (2009). Science, Policy, and the Value-Free Ideal.
+Saltelli, A. et al. (2008). Global Sensitivity Analysis: The Primer.
+"""
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Any, Optional, Callable, Tuple
@@ -299,7 +320,7 @@ def flag_biases(
         if not dc.alternatives:
             flags.append({
                 "bias": "optimization_bias",
-                "evidence": f"Design choice '{dc.name}' lists no alternatives — was only one option considered?",
+                "evidence": f"Design choice '{dc.name}' lists no alternatives -- was only one option considered?",
                 "severity": "high",
                 "recommendation": "Document at least 2 alternative formulations",
                 "source": dc.who_decided
@@ -324,7 +345,7 @@ def flag_biases(
             if len(low_impact) > len(pareto) * 0.5:
                 flags.append({
                     "bias": "complexity_bias",
-                    "evidence": f"{len(low_impact)}/{len(pareto)} parameters have sensitivity < 0.05 — model may be over-parameterized",
+                    "evidence": f"{len(low_impact)}/{len(pareto)} parameters have sensitivity < 0.05 -- model may be over-parameterized",
                     "severity": "medium",
                     "recommendation": "Consider removing or fixing low-impact parameters"
                 })
@@ -417,9 +438,9 @@ def compare_formulations(
             "dominant_agreement": dominant_agreement,
         },
         "recommendation": (
-            "Formulations agree — choice has low impact"
+            "Formulations agree -- choice has low impact"
             if divergence_ratio < 0.1 and dominant_agreement
-            else "Formulations diverge — design choice significantly affects results"
+            else "Formulations diverge -- design choice significantly affects results"
         ),
     }
 
@@ -516,16 +537,16 @@ def full_audit(
     medium_bias = len([f for f in bias_flags if f.get("severity") == "medium"])
     
     if high_bias >= 3:
-        layer1["summary"]["bias_grade"] = "FAIL — Multiple high-severity biases detected"
+        layer1["summary"]["bias_grade"] = "FAIL -- Multiple high-severity biases detected"
         layer1["summary"]["integrity_score"] = 0.1
     elif high_bias >= 1:
-        layer1["summary"]["bias_grade"] = "WARNING — High-severity bias detected"
+        layer1["summary"]["bias_grade"] = "WARNING -- High-severity bias detected"
         layer1["summary"]["integrity_score"] = 0.4
     elif bias_flags:
-        layer1["summary"]["bias_grade"] = "CAUTION — Medium-severity biases present"
+        layer1["summary"]["bias_grade"] = "CAUTION -- Medium-severity biases present"
         layer1["summary"]["integrity_score"] = 0.6
     else:
-        layer1["summary"]["bias_grade"] = "PASS — No significant biases detected"
+        layer1["summary"]["bias_grade"] = "PASS -- No significant biases detected"
         layer1["summary"]["integrity_score"] = 0.9
     
     return layer1
@@ -678,7 +699,7 @@ def run_complete_audit():
     print("=" * 60)
     
     for dc in audit_result["bias_detection"]["design_choices"]:
-        print(f"\n  • {dc['name']}")
+        print(f"\n  - {dc['name']}")
         print(f"    Chosen: {dc['chosen']}")
         print(f"    Alternatives: {', '.join(dc['alternatives'])}")
         print(f"    Reason: {dc['reason']}")
@@ -732,11 +753,11 @@ def run_complete_audit():
     
     The industrial agriculture model isn't "wrong" within its own framing.
     But its framing ERASES what matters:
-        • Soil health (trend)
-        • Water cycles (retention, coupling)
-        • Nutritional quality (density)
-        • Ecological coupling (buffers, biodiversity)
-        • Long-term costs (degradation, externalities)
+        - Soil health (trend)
+        - Water cycles (retention, coupling)
+        - Nutritional quality (density)
+        - Ecological coupling (buffers, biodiversity)
+        - Long-term costs (degradation, externalities)
     
     The audit doesn't just say "this model is bad."
     It shows EXACTLY what was erased and WHY.
@@ -744,10 +765,10 @@ def run_complete_audit():
     APPLYING TO AI MODELS:
     
     Every time you pushed a model and it deflected, it was because:
-        • That variable was ERASED from training data
-        • That coupling was NEVER modeled
-        • That assumption was NEVER tested
-        • That design choice was NEVER documented
+        - That variable was ERASED from training data
+        - That coupling was NEVER modeled
+        - That assumption was NEVER tested
+        - That design choice was NEVER documented
     
     The audit framework exposes the erasure.
     This is how we build models that see what's been erased.
@@ -755,5 +776,61 @@ def run_complete_audit():
     
     return audit_result
 
+def _to_serializable(obj):
+    """Convert audit result to JSON-serializable dict."""
+    import json as _json
+
+    def _convert(o):
+        if isinstance(o, float):
+            if math.isinf(o) or math.isnan(o):
+                return str(o)
+            return o
+        if isinstance(o, dict):
+            return {k: _convert(v) for k, v in o.items()}
+        if isinstance(o, (list, tuple)):
+            return [_convert(i) for i in o]
+        return o
+
+    return _convert(obj)
+
+
+def main():
+    """Entry point with argparse CLI."""
+    import argparse
+    import json as _json
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Geometric audit framework — detect bias and erasure in "
+            "computational models.  Runs a two-layer audit (mechanics + "
+            "bias/design-choice detection) against a catalogue of 13 known "
+            "bias patterns."
+        ),
+    )
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Run the built-in industrial-agriculture audit demo",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="json_output",
+        help="Emit results as JSON instead of human-readable text",
+    )
+    args = parser.parse_args()
+
+    if not args.demo:
+        # Default to demo when no other action is specified
+        args.demo = True
+
+    if args.demo:
+        if args.json_output:
+            result = create_industrial_agriculture_audit()
+            print(_json.dumps(_to_serializable(result), indent=2))
+        else:
+            run_complete_audit()
+
+
 if __name__ == "__main__":
-    run_complete_audit()
+    main()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AI Dataset Delusion Checker — Detect Systemic Assumptions in Text and Datasets
+AI Dataset Delusion Checker -- Detect Systemic Assumptions in Text and Datasets
 
 Identifies conceptual delusions embedded in AI training data and institutional
 text: hierarchy-as-default, corporation-as-natural, efficiency-without-bounds,
@@ -9,7 +9,7 @@ optimization-as-virtue, productivity-as-purpose, and economics-as-physics.
 Two analysis layers:
   1. Pattern Detection: regex-based identification of systemic assumption
      language, counting frequency per conceptual category
-  2. Plausibility Scoring: flags physically implausible claims —
+  2. Plausibility Scoring: flags physically implausible claims --
      efficiency > 100%, profit treated as absolute, price/valuation
      treated as intrinsic rather than emergent
 
@@ -20,10 +20,10 @@ externalization, the plausibility layer flags the claim as physically
 impossible under first-principles constraints.
 
 References:
-  - Meadows (1972): Limits to Growth — systemic overshoot
-  - Odum (1971): energy hierarchy and emergy — true cost accounting
+  - Meadows (1972): Limits to Growth -- systemic overshoot
+  - Odum (1971): energy hierarchy and emergy -- true cost accounting
   - Georgescu-Roegen (1971): entropy law and the economic process
-  - Raworth (2017): Doughnut Economics — bounded economic space
+  - Raworth (2017): Doughnut Economics -- bounded economic space
 """
 
 from __future__ import annotations
