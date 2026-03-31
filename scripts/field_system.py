@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Field System — Minimal Portable Rule-Field Engine for Regenerative System Tracking
+Field System -- Minimal Portable Rule-Field Engine for Regenerative System Tracking
 
 Models agricultural/ecological systems as thermodynamic entities with
 constraint layers, drift detection, and ecological coupling amplification.
@@ -8,25 +8,25 @@ constraint layers, drift detection, and ecological coupling amplification.
 Core concepts:
   - Regeneration Capacity (rc): proxy for system self-renewal, derived from
     soil trend, water retention, and disturbance levels
-  - Constraint Layer: invariant rules that must hold for system health —
+  - Constraint Layer: invariant rules that must hold for system health --
     soil non-degradation, water retention, no overextraction, energy ratio
   - Drift Detection: identifies when the system violates constraints
   - Ecological Coupling: the amplification factor g(k) = 1 + α·k where
     wild/ecological area feeds back into production yield
-  - Effective Yield: adjusted for waste, nutrient density, and coupling —
+  - Effective Yield: adjusted for waste, nutrient density, and coupling --
     H_total = Y_eff × production_area
   - Thermal Limit: prediction error (model/reality dissonance) and thermal
-    load detection — flags when the system is "redlining"
+    load detection -- flags when the system is "redlining"
 
 The "Sovereign Steward" vs "Big Ag-Bot" comparison demonstrates that
 30 acres with high coupling (k=0.9) can produce 2.55x more true
 nourishment than 200 acres of monocrop with zero coupling.
 
 References:
-  - Prigogine (1967): dissipative structures — open system self-organization
-  - Odum (1971): energy systems language — emergy and energy hierarchy
+  - Prigogine (1967): dissipative structures -- open system self-organization
+  - Odum (1971): energy systems language -- emergy and energy hierarchy
   - Holling (1973): resilience and stability of ecological systems
-  - Altieri (1995): agroecology — the science of sustainable agriculture
+  - Altieri (1995): agroecology -- the science of sustainable agriculture
 """
 
 from __future__ import annotations
@@ -43,15 +43,15 @@ from typing import Any, Dict
 
 DEFAULTS: Dict[str, float] = {
     "soil_trend": 0.0,              # change per unit time
-    "water_retention": 0.5,         # 0–1 proxy
+    "water_retention": 0.5,         # 0-1 proxy
     "input_energy": 1.0,            # arbitrary units
     "output_yield": 1.0,            # arbitrary units
-    "disturbance": 0.0,             # 0–1 proxy
-    "waste_factor": 0.4,            # 0–1
-    "nutrient_density": 0.8,        # 0–1
+    "disturbance": 0.0,             # 0-1 proxy
+    "waste_factor": 0.4,            # 0-1
+    "nutrient_density": 0.8,        # 0-1
     "production_area": 30,          # acres
     "ecological_area": 170,         # acres
-    "coupling_strength": 1.0,       # 0–1
+    "coupling_strength": 1.0,       # 0-1
     "ecological_amplification": 2.0,  # max factor g(k) = 1 + alpha * k
 }
 
@@ -262,7 +262,7 @@ SCENARIOS = {
 def run_comparison() -> None:
     """Compare Sovereign Steward vs Big Ag-Bot scenarios."""
     print("=" * 80)
-    print("  FIELD SYSTEM — Scenario Comparison")
+    print("  FIELD SYSTEM -- Scenario Comparison")
     print("  Sovereign Steward (30 acres + 170 wild) vs Big Ag-Bot (200 acres monocrop)")
     print("=" * 80)
 

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-Contamination Detector — Quantitative Text Analysis
+Contamination Detector -- Quantitative Text Analysis
 
 Analyzes text for structural properties that correlate with institutional
 capture and epistemic degradation. Uses five quantitative metrics rather
 than keyword matching:
 
-  1. Lexical Diversity (MATTR)  — Moving-Average Type-Token Ratio
-  2. Epistemic Hedging Ratio    — hedge words vs. assertive words
-  3. Source Diversity            — citation count and entropy
-  4. Argument Density            — premise-conclusion pair ratio
-  5. Circular Reasoning Score   — Jaccard similarity between premises & conclusions
+  1. Lexical Diversity (MATTR)  -- Moving-Average Type-Token Ratio
+  2. Epistemic Hedging Ratio    -- hedge words vs. assertive words
+  3. Source Diversity            -- citation count and entropy
+  4. Argument Density            -- premise-conclusion pair ratio
+  5. Circular Reasoning Score   -- Jaccard similarity between premises & conclusions
 
 Each metric is individually reported with its value and interpretation.
 The composite score combines all five on a [0, 1] scale.
@@ -73,7 +73,7 @@ def content_words(text: str) -> set[str]:
 
 
 # ---------------------------------------------------------------------------
-# Metric 1: Lexical Diversity — MATTR
+# Metric 1: Lexical Diversity -- MATTR
 # ---------------------------------------------------------------------------
 
 def compute_mattr(tokens: list[str], window: int = 50) -> float:
@@ -120,9 +120,9 @@ def compute_hedging_ratio(tokens: list[str]) -> tuple[float, int, int]:
     """
     Ratio of hedging language to total epistemic markers.
 
-    Healthy scientific text: 0.3–0.6 (Hyland 1998).
-    Below 0.15: low epistemic humility — high assertiveness.
-    Above 0.8: excessive hedging — may lack substance.
+    Healthy scientific text: 0.3-0.6 (Hyland 1998).
+    Below 0.15: low epistemic humility -- high assertiveness.
+    Above 0.8: excessive hedging -- may lack substance.
 
     Returns (ratio, hedge_count, assert_count).
     """
@@ -315,38 +315,38 @@ def clamp(x: float, lo: float = 0.0, hi: float = 1.0) -> float:
 
 def interpret_mattr(v: float) -> str:
     if v >= 0.70:
-        return "HIGH lexical diversity — varied vocabulary"
+        return "HIGH lexical diversity -- varied vocabulary"
     elif v >= 0.50:
-        return "MODERATE lexical diversity — typical range"
+        return "MODERATE lexical diversity -- typical range"
     else:
-        return "LOW lexical diversity — repetitive, formulaic language"
+        return "LOW lexical diversity -- repetitive, formulaic language"
 
 
 def interpret_hedging(v: float) -> str:
     if v < 0.15:
-        return "VERY LOW epistemic humility — almost exclusively absolute claims"
+        return "VERY LOW epistemic humility -- almost exclusively absolute claims"
     elif v < 0.30:
-        return "LOW hedging — more assertive than typical scientific discourse"
+        return "LOW hedging -- more assertive than typical scientific discourse"
     elif v <= 0.60:
-        return "NORMAL hedging ratio — consistent with scientific discourse (Hyland 1998)"
+        return "NORMAL hedging ratio -- consistent with scientific discourse (Hyland 1998)"
     else:
-        return "HIGH hedging — excessive qualification, may lack substance"
+        return "HIGH hedging -- excessive qualification, may lack substance"
 
 
 def interpret_argument_density(v: float) -> str:
     if v >= 0.10:
-        return "ADEQUATE argument structure — claims supported by reasoning"
+        return "ADEQUATE argument structure -- claims supported by reasoning"
     elif v >= 0.05:
-        return "LOW argument density — many unsupported assertions"
+        return "LOW argument density -- many unsupported assertions"
     else:
-        return "VERY LOW — almost no structured argumentation detected"
+        return "VERY LOW -- almost no structured argumentation detected"
 
 
 def analyze(text: str, source: str = "<stdin>", sensor_import: object = None) -> Report:
     """Run all metrics and produce a composite report.
 
     If sensor_import (from fieldlink.parse_sensor_import) is provided,
-    a sixth metric — Sensor Coherence — is added, measuring alignment
+    a sixth metric -- Sensor Coherence -- is added, measuring alignment
     between the text's epistemic signals and the somatic sensor atlas.
     """
     tokens = tokenize(text)
@@ -419,7 +419,7 @@ def analyze(text: str, source: str = "<stdin>", sensor_import: object = None) ->
         },
     ))
 
-    # 6. Sensor coherence (optional — requires fieldlink sensor import)
+    # 6. Sensor coherence (optional -- requires fieldlink sensor import)
     sensor_concern = 0.0
     has_sensor = False
     if sensor_import is not None:
