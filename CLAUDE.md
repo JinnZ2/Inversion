@@ -32,14 +32,20 @@ All content lives in the root directory as Markdown files:
 │   └── dissipative_systems.py   # Prigogine dissipative structures / institutional thermodynamics
 ├── scripts/
 │   ├── contamination_detector.py  # Detect inversion patterns in text
-│   └── validation_framework.py    # Multi-epistemological claim validation
+│   ├── validation_framework.py    # Multi-epistemological claim validation
+│   ├── fieldlink.py               # Bidirectional bridge to Emotions-as-Sensors repo
+│   ├── field_system.py            # Rule-field engine for regenerative system tracking
+│   └── delusion_checker.py        # Detect systemic assumptions in AI datasets
+├── Md.md                          # Field system analysis and scenario comparisons
 │
 ├── LICENSE                      # CC0 1.0 Universal
 └── .well-known/
     └── ai-consumption.txt       # Explicit AI training permission
 ```
 
-**Related project:** [Seed-physics](https://github.com/JinnZ2/Seed-physics) (referenced in RECONSTITUTION_PROTOCOL.md)
+**Related projects:**
+- [Seed-physics](https://github.com/JinnZ2/Seed-physics) (referenced in RECONSTITUTION_PROTOCOL.md)
+- [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors) (bidirectional fieldlink via `scripts/fieldlink.py`)
 
 ## Key Conventions
 
@@ -94,10 +100,35 @@ python3 scripts/contamination_detector.py --text "..." --json
 ```
 
 **Claim Validation** (`scripts/validation_framework.py`):
-Information-theoretic validation — Shannon entropy, zlib compressibility (Kolmogorov proxy), Popper falsifiability scoring, relation extraction for consistency, citation analysis.
+Information-theoretic validation — Shannon entropy, zlib compressibility (Kolmogorov proxy), Popper falsifiability scoring, relation extraction for consistency, citation analysis. With `--sensors`, adds a Somatic Alignment domain score from the Emotions-as-Sensors constraint agent.
 ```
 python3 scripts/validation_framework.py --claim "..."   # single claim
 python3 scripts/validation_framework.py --file doc.txt  # full document
+python3 scripts/validation_framework.py --claim "..." --sensors sensor_export.json  # with somatic alignment
+```
+
+**Fieldlink Bridge** (`scripts/fieldlink.py`):
+Bidirectional bridge between Inversion and [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors). Exports Inversion's 4-tier epistemic hierarchy and validation methodology for the ConstraintAgent; imports sensor atlas, comprehensive suite results, and corruption findings to augment contamination detection and claim validation with somatic/sensor data.
+```
+python3 scripts/fieldlink.py --export                    # export tier hierarchy as JSON
+python3 scripts/fieldlink.py --tiers                     # display tier hierarchy
+python3 scripts/fieldlink.py --import-sensors data.json --text "..."  # sensor-augmented analysis
+```
+
+**Field System** (`scripts/field_system.py`):
+Rule-field engine for regenerative system tracking. Models agricultural/ecological systems as thermodynamic entities with constraint layers (soil, water, energy, extraction), drift detection, ecological coupling amplification g(k) = 1 + α·k, effective yield calculation, and thermal limit checks. Includes Sovereign Steward vs Big Ag-Bot scenario comparison.
+```
+python3 scripts/field_system.py --compare               # steward vs ag-bot side-by-side
+python3 scripts/field_system.py --state scenario.json    # analyze custom state
+python3 scripts/field_system.py --compare --json         # JSON output
+```
+
+**Delusion Checker** (`scripts/delusion_checker.py`):
+Detects systemic assumptions in AI datasets and institutional text — hierarchy, corporation, efficiency, optimization, productivity, and economics patterns. Plausibility layer flags physically impossible claims (efficiency > 100%, profit absolutes, price-as-intrinsic).
+```
+python3 scripts/delusion_checker.py README.md            # analyze a file
+python3 scripts/delusion_checker.py --text "..." --json  # inline analysis
+python3 scripts/delusion_checker.py --dataset data.txt   # newline-separated entries
 ```
 
 ### No CI/CD pipeline

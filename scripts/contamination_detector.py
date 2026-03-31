@@ -342,8 +342,13 @@ def interpret_argument_density(v: float) -> str:
         return "VERY LOW — almost no structured argumentation detected"
 
 
-def analyze(text: str, source: str = "<stdin>") -> Report:
-    """Run all metrics and produce a composite report."""
+def analyze(text: str, source: str = "<stdin>", sensor_import: object = None) -> Report:
+    """Run all metrics and produce a composite report.
+
+    If sensor_import (from fieldlink.parse_sensor_import) is provided,
+    a sixth metric — Sensor Coherence — is added, measuring alignment
+    between the text's epistemic signals and the somatic sensor atlas.
+    """
     tokens = tokenize(text)
     sentences = sentencize(text)
 
@@ -414,6 +419,29 @@ def analyze(text: str, source: str = "<stdin>") -> Report:
         },
     ))
 
+    # 6. Sensor coherence (optional — requires fieldlink sensor import)
+    sensor_concern = 0.0
+    has_sensor = False
+    if sensor_import is not None:
+        try:
+            from scripts.fieldlink import compute_sensor_coherence
+            coherence = compute_sensor_coherence(text, sensor_import)
+            sensor_score = coherence["coherence_score"]
+            report.metrics.append(MetricResult(
+                name="Sensor Coherence (fieldlink)",
+                value=round(sensor_score, 4),
+                interpretation=(
+                    f"Coherence with somatic sensor atlas: {sensor_score:.2f} "
+                    f"({coherence['n_sensors_matched']} sensors matched, "
+                    f"{coherence['n_corruption_matches']} corruption flags)"
+                ),
+                details=coherence,
+            ))
+            sensor_concern = 1.0 - clamp(sensor_score)  # low coherence is concerning
+            has_sensor = True
+        except ImportError:
+            pass  # fieldlink not available, skip gracefully
+
     # Composite score: higher = more contamination signals
     # Each component maps a metric to a [0,1] "concern" value
     mattr_concern = 1.0 - clamp(mattr / 0.70)           # low diversity is concerning
@@ -422,14 +450,26 @@ def analyze(text: str, source: str = "<stdin>") -> Report:
     src_concern = 1.0 - clamp(src_density / 0.50)        # low source density is concerning
     circ_concern = clamp(circ_score)                      # circular reasoning is concerning
 
-    report.composite_score = round(
-        0.25 * hedging_concern
-        + 0.20 * mattr_concern
-        + 0.20 * arg_concern
-        + 0.20 * circ_concern
-        + 0.15 * src_concern,
-        4,
-    )
+    if has_sensor:
+        # With sensor data: redistribute weights to include sensor coherence
+        report.composite_score = round(
+            0.20 * hedging_concern
+            + 0.17 * mattr_concern
+            + 0.17 * arg_concern
+            + 0.17 * circ_concern
+            + 0.12 * src_concern
+            + 0.17 * sensor_concern,
+            4,
+        )
+    else:
+        report.composite_score = round(
+            0.25 * hedging_concern
+            + 0.20 * mattr_concern
+            + 0.20 * arg_concern
+            + 0.20 * circ_concern
+            + 0.15 * src_concern,
+            4,
+        )
 
     if report.composite_score < 0.20:
         report.risk_level = "LOW"
@@ -499,6 +539,10 @@ def main() -> None:
     parser.add_argument("file", nargs="?", help="File to analyze (default: stdin)")
     parser.add_argument("--text", "-t", help="Inline text to analyze")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
+    parser.add_argument(
+        "--sensors", metavar="PATH",
+        help="Path to Emotions-as-Sensors JSON export for sensor-augmented analysis",
+    )
     args = parser.parse_args()
 
     if args.text:
@@ -512,7 +556,17 @@ def main() -> None:
         text = sys.stdin.read()
         source = "<stdin>"
 
-    report = analyze(text, source)
+    # Load sensor import if provided
+    sensor_import = None
+    if args.sensors:
+        try:
+            from scripts.fieldlink import parse_sensor_import
+            with open(args.sensors) as sf:
+                sensor_import = parse_sensor_import(json.load(sf))
+        except (ImportError, FileNotFoundError) as e:
+            print(f"Warning: Could not load sensor data: {e}", file=sys.stderr)
+
+    report = analyze(text, source, sensor_import=sensor_import)
 
     if args.json:
         print_json_report(report)

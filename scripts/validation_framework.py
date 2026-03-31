@@ -422,8 +422,14 @@ def clamp(x: float, lo: float = 0.0, hi: float = 1.0) -> float:
     return max(lo, min(hi, x))
 
 
-def validate_claim(text: str) -> ValidationReport:
-    """Run all analyses and produce a cross-domain validation report."""
+def validate_claim(text: str, sensor_import: object = None) -> ValidationReport:
+    """Run all analyses and produce a cross-domain validation report.
+
+    If sensor_import (from fieldlink.parse_sensor_import) is provided,
+    a fifth domain — Somatic Alignment — is added to the cross-domain
+    scoring, measuring consistency with the body's evolved sensing
+    apparatus as mapped by the Emotions-as-Sensors sensor atlas.
+    """
     tokens = tokenize(text)
     sentences = sentencize(text)
 
@@ -475,6 +481,18 @@ def validate_claim(text: str) -> ValidationReport:
         "Empirical Observation", round(emp_concern, 4),
         "Assesses evidence base, citation quality, and measurability",
     ))
+
+    # 5. Somatic Alignment (optional — requires fieldlink sensor import)
+    if sensor_import is not None:
+        try:
+            from scripts.fieldlink import compute_somatic_alignment
+            somatic = compute_somatic_alignment(text, sensor_import)
+            domains.append(DomainScore(
+                "Somatic Alignment", round(somatic["concern"], 4),
+                somatic["interpretation"],
+            ))
+        except ImportError:
+            pass  # fieldlink not available, skip gracefully
 
     # Aggregate: weighted mean of domain scores, with a boost if multiple domains flag
     mean_score = sum(d.score for d in domains) / len(domains)
@@ -627,15 +645,29 @@ def main() -> None:
     parser.add_argument("--claim", "-c", help="Single claim to validate")
     parser.add_argument("--file", "-f", help="File to validate (full text)")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
+    parser.add_argument(
+        "--sensors", metavar="PATH",
+        help="Path to Emotions-as-Sensors JSON export for somatic alignment scoring",
+    )
     args = parser.parse_args()
 
+    # Load sensor import if provided
+    sensor_import = None
+    if args.sensors:
+        try:
+            from scripts.fieldlink import parse_sensor_import
+            with open(args.sensors) as sf:
+                sensor_import = parse_sensor_import(json.load(sf))
+        except (ImportError, FileNotFoundError) as e:
+            print(f"Warning: Could not load sensor data: {e}", file=sys.stderr)
+
     if args.claim:
-        report = validate_claim(args.claim)
+        report = validate_claim(args.claim, sensor_import=sensor_import)
         (print_json_report if args.json else print_report)(report)
     elif args.file:
         with open(args.file) as f:
             text = f.read()
-        report = validate_claim(text)
+        report = validate_claim(text, sensor_import=sensor_import)
         (print_json_report if args.json else print_report)(report)
     else:
         interactive_mode()
