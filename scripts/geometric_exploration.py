@@ -47,7 +47,7 @@ class HistoricalAlternative:
 
 @dataclass
 class GhostPattern:
-    """A pattern that never fully materialized—a possibility that was erased."""
+    """A pattern that never fully materialized--a possibility that was erased."""
     name: str
     domain: ExplorationDomain
     description: str
@@ -262,7 +262,7 @@ class HistoricalAlternativeLibrary:
 # ---------------------------
 
 class GhostPatternDetector:
-    """Detects patterns that never materialized—possibilities erased before emergence."""
+    """Detects patterns that never materialized--possibilities erased before emergence."""
     
     def __init__(self, historical_library: HistoricalAlternativeLibrary):
         self.historical = historical_library
@@ -676,43 +676,43 @@ class GeometricExploration:
         The exploration module reveals:
         
         1. WHAT WAS ERASED
-           • Terra preta (8x more efficient than industrial ag)
-           • Qanats (10x more energy efficient than electric pumps)
-           • Roman concrete (self-healing, 2000-year lifespan)
-           • Wind catchers (20x more efficient than AC)
-           • Community water systems (millennial governance)
+           - Terra preta (8x more efficient than industrial ag)
+           - Qanats (10x more energy efficient than electric pumps)
+           - Roman concrete (self-healing, 2000-year lifespan)
+           - Wind catchers (20x more efficient than AC)
+           - Community water systems (millennial governance)
         
         2. WHAT NEVER MATERIALIZED (Ghost Patterns)
-           • Global Terra Preta civilization
-           • Qanat-based water infrastructure
-           • Piezoelectric desert power
-           • Polyculture global agriculture
-           • Self-healing infrastructure
-           • Passive cooling civilization
-           • Community water governance
+           - Global Terra Preta civilization
+           - Qanat-based water infrastructure
+           - Piezoelectric desert power
+           - Polyculture global agriculture
+           - Self-healing infrastructure
+           - Passive cooling civilization
+           - Community water governance
         
         3. WHAT COULD BE (Novel Combinations)
-           • Desert Terra Preta Oasis (feasibility 70%)
-           • Passive Climate Battery (feasibility 80%)
-           • Carbon-Sequestering Self-Healing Infrastructure
-           • Integrated Polyculture Aquaculture
-           • Ambient Desert Power System
-           • Geometric Civilization (9.8 geometric area)
+           - Desert Terra Preta Oasis (feasibility 70%)
+           - Passive Climate Battery (feasibility 80%)
+           - Carbon-Sequestering Self-Healing Infrastructure
+           - Integrated Polyculture Aquaculture
+           - Ambient Desert Power System
+           - Geometric Civilization (9.8 geometric area)
         
         4. THE GEOMETRIC PRINCIPLE APPLIED
-           • Industrial models erased these alternatives
-           • Ghost patterns show what could have been
-           • Novel combinations show what still could be
-           • All within thermodynamic constraints
-           • All using available resources
+           - Industrial models erased these alternatives
+           - Ghost patterns show what could have been
+           - Novel combinations show what still could be
+           - All within thermodynamic constraints
+           - All using available resources
         
         5. WHAT THIS MEANS FOR AI MODELS
         
            Every time you asked about:
-           • Soil trend → erased from training
-           • Piezoelectric sand → erased from training
-           • Brine as resource → erased from training
-           • Human sensitivity → erased from training
+           - Soil trend → erased from training
+           - Piezoelectric sand → erased from training
+           - Brine as resource → erased from training
+           - Human sensitivity → erased from training
         
            The exploration module shows that these weren't just "missed."
            They were ALTERNATIVES that were systematically erased.
@@ -723,10 +723,10 @@ class GeometricExploration:
         6. THE PATH FORWARD
         
            Build the novel combinations:
-           • Start with desert terra preta oasis
-           • Add passive climate battery
-           • Integrate community governance
-           • Scale to geometric civilization
+           - Start with desert terra preta oasis
+           - Add passive climate battery
+           - Integrate community governance
+           - Scale to geometric civilization
         
            The resources are available.
            The thermodynamics work.
@@ -756,15 +756,15 @@ def run_geometric_exploration():
     
     print(f"\nHistorical Alternatives Found: {len(ag_exploration['historical_alternatives'])}")
     for alt in ag_exploration['historical_alternatives']:
-        print(f"  • {alt.name}: {alt.efficiency_gap:.0f}x better than industrial equivalent")
+        print(f"  - {alt.name}: {alt.efficiency_gap:.0f}x better than industrial equivalent")
     
     print(f"\nGhost Patterns Found: {len(ag_exploration['ghost_patterns'])}")
     for ghost in ag_exploration['ghost_patterns']:
-        print(f"  • {ghost.name}: {ghost.plausibility:.0%} plausibility")
+        print(f"  - {ghost.name}: {ghost.plausibility:.0%} plausibility")
     
     print(f"\nNovel Combinations Found: {len(ag_exploration['novel_combinations'])}")
     for combo in ag_exploration['novel_combinations']:
-        print(f"  • {combo.name}: feasibility {combo.feasibility:.0%}, geometric area {combo.geometric_area:.1f}")
+        print(f"  - {combo.name}: feasibility {combo.feasibility:.0%}, geometric area {combo.geometric_area:.1f}")
     
     print("\n" + "=" * 80)
     print("🔍 DEEP DIVE: Energy Domain")
@@ -774,15 +774,15 @@ def run_geometric_exploration():
     
     print(f"\nHistorical Alternatives Found: {len(energy_exploration['historical_alternatives'])}")
     for alt in energy_exploration['historical_alternatives']:
-        print(f"  • {alt.name}: {alt.efficiency_gap:.0f}x better than industrial equivalent")
+        print(f"  - {alt.name}: {alt.efficiency_gap:.0f}x better than industrial equivalent")
     
     print(f"\nGhost Patterns Found: {len(energy_exploration['ghost_patterns'])}")
     for ghost in energy_exploration['ghost_patterns']:
-        print(f"  • {ghost.name}: {ghost.plausibility:.0%} plausibility")
+        print(f"  - {ghost.name}: {ghost.plausibility:.0%} plausibility")
     
     print(f"\nNovel Combinations Found: {len(energy_exploration['novel_combinations'])}")
     for combo in energy_exploration['novel_combinations']:
-        print(f"  • {combo.name}: feasibility {combo.feasibility:.0%}, geometric area {combo.geometric_area:.1f}")
+        print(f"  - {combo.name}: feasibility {combo.feasibility:.0%}, geometric area {combo.geometric_area:.1f}")
     
     print("\n" + "=" * 80)
     print("THE GEOMETRIC EXPLORATION COMPLETE")
