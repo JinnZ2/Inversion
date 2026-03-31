@@ -1,6 +1,31 @@
-# geometric_exploration.py
-# Exploration Module: Finding What Was Erased, What Could Have Been
-# Searches ghost patterns, historical alternatives, and novel combinations
+#!/usr/bin/env python3
+"""Geometric exploration module — surface erased historical alternatives,
+ghost patterns, and novel thermodynamically-valid combinations.
+
+Maintains a curated library of historical technologies and practices that
+were marginalized or erased (Terra Preta, Qanats, Roman concrete, Three
+Sisters polyculture, etc.), detects "ghost patterns" — possibilities that
+never materialized — and generates novel combinations constrained by
+thermodynamic feasibility.  Each combination is scored on geometric area
+(system integrity), feasibility, and coupling strength.
+
+Methodology
+-----------
+- Historical alternatives sourced from archaeological and ethnobotanical
+  literature; efficiency gaps are order-of-magnitude estimates from
+  lifecycle analyses.
+- Ghost patterns constructed via counterfactual reasoning grounded in
+  documented evidence fragments.
+- Novel combinations validated against first-law and second-law
+  thermodynamic constraints (energy balance, entropy production).
+
+References
+----------
+Glaser, B. (2007). Prehistorically modified soils of central Amazonia.
+Lightfoot, D. R. (2000). The origin and diffusion of qanats.
+Jackson, M. D. et al. (2017). Phillipsite and Al-tobermorite mineral
+    cements in Roman seawater concrete.
+"""
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Any, Optional, Set, Tuple, Callable
@@ -788,5 +813,86 @@ def run_geometric_exploration():
     print("THE GEOMETRIC EXPLORATION COMPLETE")
     print("=" * 80)
 
+def _exploration_to_dict(exploration):
+    """Convert exploration results to JSON-serializable dict."""
+    result = {
+        "historical_alternatives": {},
+        "ghost_patterns": [],
+        "novel_combinations": [],
+        "domain_potential": {},
+    }
+    for name, alt in exploration.historical.alternatives.items():
+        result["historical_alternatives"][name] = {
+            "name": alt.name,
+            "domain": alt.domain.value,
+            "culture": alt.culture,
+            "time_period": alt.time_period,
+            "description": alt.description,
+            "mechanism": alt.mechanism,
+            "why_erased": alt.why_erased,
+            "efficiency_gap": alt.efficiency_gap,
+            "revival_status": alt.revival_status,
+            "geometric_insight": alt.geometric_insight,
+        }
+    for ghost in exploration.ghost_detector.search_ghosts():
+        result["ghost_patterns"].append({
+            "name": ghost.name,
+            "domain": ghost.domain.value,
+            "description": ghost.description,
+            "plausibility": ghost.plausibility,
+            "what_would_it_enable": ghost.what_would_it_enable,
+        })
+    for combo in exploration.invention_engine.rank_by_geometric_area():
+        result["novel_combinations"].append({
+            "name": combo.name,
+            "components": combo.components,
+            "domains": [d.value for d in combo.domains],
+            "geometric_area": combo.geometric_area,
+            "feasibility": combo.feasibility,
+            "coupling_strength": combo.coupling_strength,
+            "emergent_properties": combo.emergent_properties,
+        })
+    for domain in ExplorationDomain:
+        result["domain_potential"][domain.value] = exploration._calculate_domain_potential(domain)
+    return result
+
+
+def main():
+    """Entry point with argparse CLI."""
+    import argparse
+    import json as _json
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Geometric exploration module — surface erased historical "
+            "alternatives, ghost patterns, and novel thermodynamically-valid "
+            "combinations of ancient and modern technologies."
+        ),
+    )
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Run the full exploration demo (historical, ghosts, novel combos)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="json_output",
+        help="Emit results as JSON instead of human-readable text",
+    )
+    args = parser.parse_args()
+
+    if not args.demo:
+        # Default to demo when no other action is specified
+        args.demo = True
+
+    if args.demo:
+        if args.json_output:
+            exploration = GeometricExploration()
+            print(_json.dumps(_exploration_to_dict(exploration), indent=2))
+        else:
+            run_geometric_exploration()
+
+
 if __name__ == "__main__":
-    run_geometric_exploration()
+    main()
