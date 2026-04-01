@@ -17,8 +17,8 @@ Layer 2 adds bias detection and design choice accountability:
 Output formats: JSON, Markdown, CSV.
 
 Usage:
-  from scripts.audit_core import audit_function, ParameterSpec, AssumptionRecord
-  from scripts.bias_detection import flag_biases, DesignChoice
+  from scripts.audit.audit_core import audit_function, ParameterSpec, AssumptionRecord
+  from scripts.audit.bias_detection import flag_biases, DesignChoice
   from scripts.first_principles_audit import full_audit
 
   report = full_audit(func, params, ranges, specs=specs, assumptions=assumptions)
@@ -41,16 +41,16 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # Allow running as script or module
 if __name__ == "__main__":
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from scripts.audit_core import (
+from scripts.audit.audit_core import (
     AssumptionRecord,
     ParameterSpec,
     audit_function,
     generate_report,
     sensitivity_analysis,
 )
-from scripts.bias_detection import (
+from scripts.audit.bias_detection import (
     DesignChoice,
     compare_formulations,
     flag_biases,

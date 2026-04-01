@@ -424,7 +424,7 @@ def analyze(text: str, source: str = "<stdin>", sensor_import: object = None) ->
     has_sensor = False
     if sensor_import is not None:
         try:
-            from scripts.fieldlink import compute_sensor_coherence
+            from scripts.analysis.fieldlink import compute_sensor_coherence
             coherence = compute_sensor_coherence(text, sensor_import)
             sensor_score = coherence["coherence_score"]
             report.metrics.append(MetricResult(
@@ -560,7 +560,7 @@ def main() -> None:
     sensor_import = None
     if args.sensors:
         try:
-            from scripts.fieldlink import parse_sensor_import
+            from scripts.analysis.fieldlink import parse_sensor_import
             with open(args.sensors) as sf:
                 sensor_import = parse_sensor_import(json.load(sf))
         except (ImportError, FileNotFoundError) as e:

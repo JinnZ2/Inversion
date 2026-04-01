@@ -11,11 +11,11 @@
 
 ## Repository Structure
 
-All content lives in the root directory as Markdown files:
+Markdown documents live in the root directory. Python scripts are organized into subdirectories by domain:
 
 ```
 .
-├── CLAUDE.md                    # This file — AI assistant guide
+├── CLAUDE.md                    # This file -- AI assistant guide
 ├── README.md                    # Project overview, validation methodology, contribution guide
 ├── requirements.txt             # Python dependencies (stdlib only currently)
 │
@@ -30,13 +30,48 @@ All content lives in the root directory as Markdown files:
 ├── sims/
 │   ├── systems_dynamics.py      # Lotka-Volterra ecosystem collapse simulation
 │   └── dissipative_systems.py   # Prigogine dissipative structures / institutional thermodynamics
+│
 ├── scripts/
-│   ├── contamination_detector.py  # Detect inversion patterns in text
-│   ├── validation_framework.py    # Multi-epistemological claim validation
-│   ├── fieldlink.py               # Bidirectional bridge to Emotions-as-Sensors repo
-│   ├── field_system.py            # Rule-field engine for regenerative system tracking
-│   └── delusion_checker.py        # Detect systemic assumptions in AI datasets
-├── Md.md                          # Field system analysis and scenario comparisons
+│   ├── analysis/                # Core text analysis and validation
+│   │   ├── contamination_detector.py  # Quantitative epistemic quality analysis
+│   │   ├── validation_framework.py    # Multi-epistemological claim validation
+│   │   ├── delusion_checker.py        # Detect systemic assumptions in AI datasets
+│   │   └── fieldlink.py               # Bidirectional bridge to Emotions-as-Sensors
+│   │
+│   ├── audit/                   # Six Sigma DMAIC audit pipeline
+│   │   ├── audit_core.py        # Layer 1: sensitivity, FMEA, capability (Cp/Cpk)
+│   │   ├── bias_detection.py    # Layer 2: 8 bias patterns, design choice accountability
+│   │   ├── first_principles_audit.py  # CLI combining both layers
+│   │   └── study_extractor.py   # Study/white paper to module population pipeline
+│   │
+│   ├── geometric/               # Geometric systems, energy, and infrastructure
+│   │   ├── geometric_thinking.py       # Systems as geometry of vectors
+│   │   ├── geometric_boo.py            # Distributed infrastructure components
+│   │   ├── geometric_boo_rubble.py     # Post-disruption salvage BOO design
+│   │   ├── geometric_desalination.py   # Desalination as geometric vectors
+│   │   ├── geometric_exploration.py    # Historical alternative discovery
+│   │   ├── geometric_audit_complete.py # Geometric bias audit
+│   │   ├── unified_geometric_framework.py  # Coupled vector system geometry
+│   │   ├── innovation_engine.py        # Systematic power-increase exploration
+│   │   ├── desert_sand_energy_coupling.py  # Multi-domain energy coupling
+│   │   └── energy_wisdom_explorer.py   # Energy practice weaving and synergy
+│   │
+│   ├── systems/                 # System modeling and dynamics
+│   │   ├── field_system.py      # Rule-field engine for regenerative tracking
+│   │   ├── field_system_expanded.py    # Full dependency accounting
+│   │   ├── field_systems.py     # Portable constraint engine
+│   │   ├── resource_flow_dynamics.py   # Coupled H/C/R resource flows
+│   │   ├── organizational_topology.py  # Hierarchy vs distributed comparison
+│   │   ├── system_weaver.py     # Generic system composition
+│   │   └── dependency_audit.py  # Hidden subsidy and vulnerability auditing
+│   │
+│   └── ops/                     # Operational tools
+│       ├── operational_risk.py  # Weighted risk scoring with redline detection
+│       ├── mineral_mulch.py     # Stone mulch microclimate simulation
+│       ├── salvage_reclamation.py      # Material reclamation from failed components
+│       ├── human_body_alerts.py        # Biological sensor modeling
+│       ├── zero_infrastructure_alerts.py  # Environmental signal detection
+│       └── viewpoint_comparison.py     # Ontological gap analysis
 │
 ├── LICENSE                      # CC0 1.0 Universal
 └── .well-known/
@@ -45,7 +80,7 @@ All content lives in the root directory as Markdown files:
 
 **Related projects:**
 - [Seed-physics](https://github.com/JinnZ2/Seed-physics) (referenced in RECONSTITUTION_PROTOCOL.md)
-- [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors) (bidirectional fieldlink via `scripts/fieldlink.py`)
+- [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors) (bidirectional fieldlink via `scripts/analysis/fieldlink.py`)
 
 ## Key Conventions
 
@@ -92,43 +127,61 @@ python3 sims/dissipative_systems.py --institutions 8 --ticks 500 --inversion-rat
 python3 sims/dissipative_systems.py --json              # full history as JSON
 ```
 
-**Text Analysis** (`scripts/contamination_detector.py`):
-Quantitative epistemic quality analysis — MATTR lexical diversity, hedging ratio, citation entropy, argument density, circular reasoning detection (Jaccard similarity).
+**Text Analysis** (`scripts/analysis/contamination_detector.py`):
+Quantitative epistemic quality analysis -- MATTR lexical diversity, hedging ratio, citation entropy, argument density, circular reasoning detection (Jaccard similarity).
 ```
-python3 scripts/contamination_detector.py README.md     # analyze a file
-python3 scripts/contamination_detector.py --text "..." --json
-```
-
-**Claim Validation** (`scripts/validation_framework.py`):
-Information-theoretic validation — Shannon entropy, zlib compressibility (Kolmogorov proxy), Popper falsifiability scoring, relation extraction for consistency, citation analysis. With `--sensors`, adds a Somatic Alignment domain score from the Emotions-as-Sensors constraint agent.
-```
-python3 scripts/validation_framework.py --claim "..."   # single claim
-python3 scripts/validation_framework.py --file doc.txt  # full document
-python3 scripts/validation_framework.py --claim "..." --sensors sensor_export.json  # with somatic alignment
+python3 scripts/analysis/contamination_detector.py README.md     # analyze a file
+python3 scripts/analysis/contamination_detector.py --text "..." --json
 ```
 
-**Fieldlink Bridge** (`scripts/fieldlink.py`):
-Bidirectional bridge between Inversion and [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors). Exports Inversion's 4-tier epistemic hierarchy and validation methodology for the ConstraintAgent; imports sensor atlas, comprehensive suite results, and corruption findings to augment contamination detection and claim validation with somatic/sensor data.
+**Claim Validation** (`scripts/analysis/validation_framework.py`):
+Information-theoretic validation -- Shannon entropy, zlib compressibility (Kolmogorov proxy), Popper falsifiability scoring, relation extraction for consistency, citation analysis. With `--sensors`, adds a Somatic Alignment domain score.
 ```
-python3 scripts/fieldlink.py --export                    # export tier hierarchy as JSON
-python3 scripts/fieldlink.py --tiers                     # display tier hierarchy
-python3 scripts/fieldlink.py --import-sensors data.json --text "..."  # sensor-augmented analysis
-```
-
-**Field System** (`scripts/field_system.py`):
-Rule-field engine for regenerative system tracking. Models agricultural/ecological systems as thermodynamic entities with constraint layers (soil, water, energy, extraction), drift detection, ecological coupling amplification g(k) = 1 + α·k, effective yield calculation, and thermal limit checks. Includes Sovereign Steward vs Big Ag-Bot scenario comparison.
-```
-python3 scripts/field_system.py --compare               # steward vs ag-bot side-by-side
-python3 scripts/field_system.py --state scenario.json    # analyze custom state
-python3 scripts/field_system.py --compare --json         # JSON output
+python3 scripts/analysis/validation_framework.py --claim "..."
+python3 scripts/analysis/validation_framework.py --claim "..." --sensors sensor_export.json
 ```
 
-**Delusion Checker** (`scripts/delusion_checker.py`):
-Detects systemic assumptions in AI datasets and institutional text — hierarchy, corporation, efficiency, optimization, productivity, and economics patterns. Plausibility layer flags physically impossible claims (efficiency > 100%, profit absolutes, price-as-intrinsic).
+**Fieldlink Bridge** (`scripts/analysis/fieldlink.py`):
+Bidirectional bridge between Inversion and [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors). Exports tier hierarchy; imports sensor atlas and corruption findings.
 ```
-python3 scripts/delusion_checker.py README.md            # analyze a file
-python3 scripts/delusion_checker.py --text "..." --json  # inline analysis
-python3 scripts/delusion_checker.py --dataset data.txt   # newline-separated entries
+python3 scripts/analysis/fieldlink.py --export           # export tier hierarchy as JSON
+python3 scripts/analysis/fieldlink.py --tiers            # display tier hierarchy
+python3 scripts/analysis/fieldlink.py --import-sensors data.json --text "..."
+```
+
+**Delusion Checker** (`scripts/analysis/delusion_checker.py`):
+Detects systemic assumptions in AI datasets -- hierarchy, corporation, efficiency, optimization, productivity, economics. Plausibility layer flags physically impossible claims.
+```
+python3 scripts/analysis/delusion_checker.py README.md --json
+```
+
+**First Principles Audit** (`scripts/audit/first_principles_audit.py`):
+Six Sigma DMAIC validation engine. Layer 1: sensitivity analysis, boundary testing, FMEA, Monte Carlo capability (Cp/Cpk). Layer 2: 8 bias pattern detectors, design choice accountability, formulation comparison.
+```
+python3 -m scripts.audit.first_principles_audit --demo         # demo audit
+python3 -m scripts.audit.first_principles_audit --demo --json  # JSON output
+python3 -m scripts.audit.first_principles_audit --demo --markdown  # Markdown report
+```
+
+**Study Extractor** (`scripts/audit/study_extractor.py`):
+Automated study/white paper to module population pipeline. Generates extraction prompts, validates JSON, generates runnable code.
+```
+python3 scripts/audit/study_extractor.py --list-modules
+python3 scripts/audit/study_extractor.py --prompt field_system --paper study.txt
+```
+
+**Field System** (`scripts/systems/field_system.py`):
+Rule-field engine for regenerative system tracking. Constraint layers, ecological coupling g(k) = 1 + alpha*k, thermal limit checks. Sovereign Steward vs Big Ag-Bot comparison.
+```
+python3 scripts/systems/field_system.py --compare
+python3 scripts/systems/field_system.py --state scenario.json --json
+```
+
+**Innovation Engine** (`scripts/geometric/innovation_engine.py`):
+Systematic power-increase exploration for 5-node energy systems. 14 innovations across 7 categories with coupling matrix evaluation.
+```
+python3 scripts/geometric/innovation_engine.py --top 5
+python3 scripts/geometric/innovation_engine.py --json
 ```
 
 ### No CI/CD pipeline
@@ -162,7 +215,7 @@ There are currently:
 3. Check if changes affect cross-references in other documents
 
 ### Adding or modifying scripts
-1. Scripts go in `scripts/`, simulations in `sims/`
+1. Analysis scripts go in `scripts/analysis/`, audit in `scripts/audit/`, geometric/energy in `scripts/geometric/`, system modeling in `scripts/systems/`, operational tools in `scripts/ops/`, simulations in `sims/`
 2. Use only Python stdlib — no third-party dependencies (math, zlib, re, etc. are fine)
 3. Include `argparse` CLI with `--help` support
 4. Support both human-readable and `--json` output where applicable
