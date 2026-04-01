@@ -485,7 +485,7 @@ def validate_claim(text: str, sensor_import: object = None) -> ValidationReport:
     # 5. Somatic Alignment (optional -- requires fieldlink sensor import)
     if sensor_import is not None:
         try:
-            from scripts.fieldlink import compute_somatic_alignment
+            from scripts.analysis.fieldlink import compute_somatic_alignment
             somatic = compute_somatic_alignment(text, sensor_import)
             domains.append(DomainScore(
                 "Somatic Alignment", round(somatic["concern"], 4),
@@ -655,7 +655,7 @@ def main() -> None:
     sensor_import = None
     if args.sensors:
         try:
-            from scripts.fieldlink import parse_sensor_import
+            from scripts.analysis.fieldlink import parse_sensor_import
             with open(args.sensors) as sf:
                 sensor_import = parse_sensor_import(json.load(sf))
         except (ImportError, FileNotFoundError) as e:

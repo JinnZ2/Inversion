@@ -29,9 +29,9 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # Allow running as script or module
 if not __package__:
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from scripts.audit_core import (
+from scripts.audit.audit_core import (
     AssumptionRecord,
     ParameterSpec,
     monte_carlo_capability,
