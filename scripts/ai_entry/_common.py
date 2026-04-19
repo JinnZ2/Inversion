@@ -119,18 +119,45 @@ class MarkdownDoc:
         return meta
 
     def run_related(self, index: int = 0) -> int:
-        """Run one of the related analysis scripts against this document."""
+        """Run one of the related analysis scripts against this document.
+
+        Passes the absolute document path as the script's first positional
+        argument. Not every related script accepts a doc path -- when the
+        subprocess exits non-zero we print a hint listing the other
+        indices so the caller can try a different target.
+        """
         scripts = self.metadata().get("related_scripts") or self.related_scripts
         if not scripts:
             print(f"[{self.slug}] no related scripts registered", file=sys.stderr)
             return 1
         if index < 0 or index >= len(scripts):
-            print(f"[{self.slug}] related script index {index} out of range", file=sys.stderr)
+            print(
+                f"[{self.slug}] related script index {index} out of range "
+                f"(0..{len(scripts) - 1})",
+                file=sys.stderr,
+            )
             return 1
         script = scripts[index]
         script_path = REPO_ROOT / script
+        if not script_path.is_file():
+            print(f"[{self.slug}] script not found: {script}", file=sys.stderr)
+            return 1
         cmd = [sys.executable, str(script_path), str(self.absolute_path)]
-        return subprocess.call(cmd)
+        exit_code = subprocess.call(cmd)
+        if exit_code != 0:
+            print(
+                f"\n[{self.slug}] `{script}` exited with code {exit_code}.",
+                file=sys.stderr,
+            )
+            print(
+                f"[{self.slug}] it may not accept a document path as its first "
+                f"positional argument. Other scripts registered for this doc:",
+                file=sys.stderr,
+            )
+            for i, s in enumerate(scripts):
+                marker = "*" if i == index else " "
+                print(f"  {marker} --script-index {i}  {s}", file=sys.stderr)
+        return exit_code
 
     def cli(self, argv: list[str] | None = None) -> int:
         """Minimal per-document CLI. Reused by every handler module."""

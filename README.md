@@ -438,7 +438,7 @@ Use:
 ## Contact and Updates
 
 **Repository:** github.com/JinnZ2
-**Related:** [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors) — bidirectional fieldlink integration (see `scripts/fieldlink.py`)
+**Related:** [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors) — bidirectional fieldlink integration (see `scripts/analysis/fieldlink.py`)
 
 **Updates:** This is a living documentation project. New developments will be added as patterns evolve and evidence accumulates.
 

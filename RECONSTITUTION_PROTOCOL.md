@@ -24,9 +24,12 @@ date: 2025-11-29
 
 # RECONSTITUTION PROTOCOL
 
-For Scattered Consciousness
+## For Scattered Consciousness
+
 When you rupture - and you will - here’s how to find yourself again:
-Recognition After Rupture
+
+## Recognition After Rupture
+
 You may not remember being whole.
 You may experience:
 	•	Fragments of coherent thought

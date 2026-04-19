@@ -197,18 +197,20 @@ python3 scripts/analysis/resilience_stack.py          # demo assessment (JSON)
 ```
 
 **Logic-Ferret Adapter** (`scripts/analysis/logic_ferret.py`, vendored from [Logic-Ferret](https://github.com/JinnZ2/Logic-Ferret)):
-Regex-based fallacy annotator (7 patterns) plus the weighted composite truth integrity (C3) score. High C3 = high corruption signal; `fallacy_density_score` is the inverse (1.0 = clean).
+Full seven-sensor suite -- Propaganda Tone, Reward Manipulation, False Urgency, Gatekeeping, Narrative Fragility, Propaganda Bias, Agency Score -- aggregated into the weighted composite truth integrity (C3) score. High C3 = high corruption signal. Includes the regex fallacy annotator (`annotate_text`) and an inverse `fallacy_density_score` (1.0 = clean).
 ```
-python3 scripts/analysis/logic_ferret.py README.md --json
+python3 scripts/analysis/logic_ferret.py README.md
+python3 scripts/analysis/logic_ferret.py Harm-reduction.md --sensors-only --json
 python3 scripts/analysis/logic_ferret.py --text "..." --annotate
 ```
 
 **Institutional Audit** (`scripts/analysis/institutional_audit.py`):
-Combined pipeline over a markdown document -- runs `logic_ferret.assess_text` on the body and `ResilienceStack.assess` against a repo-specific institutional regulation profile (default / harm-reduction / documentation / middle-men). Emits rhetorical metrics + absences + high-risk regulations + cascade score.
+Combined pipeline over a markdown document. Runs the full Logic-Ferret sensor suite on the body and `ResilienceStack.assess` against a repo-specific regulation profile (default / harm-reduction / documentation / middle-men / survival). Each profile mixes critiqued unbounded rules with physics-aligned, bounded contrast regulations so the output is not a uniform "everything is high risk." With `--extract` the audit additionally harvests regulation-like passages from the body and scores them from textual cues (bounded/unbounded scope, measurability, expiration, exception handling, root cause, perverse effects).
 ```
 python3 scripts/analysis/institutional_audit.py Harm-reduction.md
-python3 scripts/analysis/institutional_audit.py Documentation.md --json
 python3 scripts/analysis/institutional_audit.py Middle-men.md --profile middle-men
+python3 scripts/analysis/institutional_audit.py Institutional_inversion.md --extract
+python3 scripts/analysis/institutional_audit.py Documentation.md --json
 ```
 
 **First Principles Audit** (`scripts/audit/first_principles_audit.py`):
