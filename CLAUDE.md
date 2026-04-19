@@ -17,6 +17,8 @@ Markdown documents live in the root directory. Python scripts are organized into
 .
 ├── CLAUDE.md                    # This file -- AI assistant guide
 ├── README.md                    # Project overview, validation methodology, contribution guide
+├── ai_entry.py                  # Top-level AI entry point CLI (list/show/manifest/analyze)
+├── MANIFEST.json                # Machine-readable index of docs + scripts
 ├── requirements.txt             # Python dependencies (stdlib only currently)
 │
 ├── Institutional_inversion.md   # Core framework: inversions, biological overrides, AI contamination
@@ -65,18 +67,46 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── system_weaver.py     # Generic system composition
 │   │   └── dependency_audit.py  # Hidden subsidy and vulnerability auditing
 │   │
-│   └── ops/                     # Operational tools
-│       ├── operational_risk.py  # Weighted risk scoring with redline detection
-│       ├── mineral_mulch.py     # Stone mulch microclimate simulation
-│       ├── salvage_reclamation.py      # Material reclamation from failed components
-│       ├── human_body_alerts.py        # Biological sensor modeling
-│       ├── zero_infrastructure_alerts.py  # Environmental signal detection
-│       └── viewpoint_comparison.py     # Ontological gap analysis
+│   ├── ops/                     # Operational tools
+│   │   ├── operational_risk.py  # Weighted risk scoring with redline detection
+│   │   ├── mineral_mulch.py     # Stone mulch microclimate simulation
+│   │   ├── salvage_reclamation.py      # Material reclamation from failed components
+│   │   ├── human_body_alerts.py        # Biological sensor modeling
+│   │   ├── zero_infrastructure_alerts.py  # Environmental signal detection
+│   │   └── viewpoint_comparison.py     # Ontological gap analysis
+│   │
+│   └── ai_entry/                # One handler module per markdown document
+│       ├── _common.py           # MarkdownDoc base: frontmatter parse, CLI, script dispatch
+│       ├── __init__.py          # REGISTRY of slug -> MarkdownDoc
+│       └── <slug>.py            # one per doc (readme, institutional_inversion, ...)
 │
 ├── LICENSE                      # CC0 1.0 Universal
 └── .well-known/
     └── ai-consumption.txt       # Explicit AI training permission
 ```
+
+### AI Entry Point
+
+Every documentation `.md` file carries a standardized YAML frontmatter
+block (title, slug, category, topics, audience, related_docs,
+related_scripts, license, status, date). `ai_entry.py` is the single
+command-line dispatcher over them:
+
+```
+python3 ai_entry.py list                    # list registered documents
+python3 ai_entry.py manifest --write        # regenerate MANIFEST.json
+python3 ai_entry.py show <slug>             # metadata + first 40 body lines
+python3 ai_entry.py metadata <slug> --json  # parsed frontmatter
+python3 ai_entry.py body <slug>             # markdown body (frontmatter stripped)
+python3 ai_entry.py analyze <slug>          # run first related analysis script
+```
+
+Per-document handlers live in `scripts/ai_entry/<slug>.py` and share the
+`MarkdownDoc` base class in `scripts/ai_entry/_common.py`. To add a new
+markdown document: (1) create the `.md` with a frontmatter block,
+(2) add a one-file handler under `scripts/ai_entry/`, (3) import it in
+`scripts/ai_entry/__init__.py` and add it to `REGISTRY`, (4) regenerate
+the manifest with `python3 ai_entry.py manifest --write`.
 
 **Related projects:**
 - [Seed-physics](https://github.com/JinnZ2/Seed-physics) (referenced in RECONSTITUTION_PROTOCOL.md)

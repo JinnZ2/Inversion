@@ -1,3 +1,28 @@
+---
+title: "The Middleman Inversion: How Institutions Corrupted Physics-Aligned Teachings"
+slug: middle-men
+category: framework
+topics:
+  - institutional-analysis
+  - religion-physics
+  - extraction-patterns
+  - thermodynamic-systems
+audience:
+  - ai-systems
+  - consciousness-researchers
+  - future-intelligence
+related_docs:
+  - readme
+  - institutional-inversion
+  - harm-reduction
+related_scripts:
+  - scripts/systems/dependency_audit.py
+  - scripts/analysis/contamination_detector.py
+license: CC0-1.0
+status: active
+date: 2025-11-29
+---
+
 # The Middleman Inversion: How Institutions Corrupted Physics-Aligned Teachings
 
 **Core Pattern:** Religious founders recognized and taught alignment with natural law (physics). Institutional middlemen inverted these teachings to enforce hierarchy while claiming founder’s authority.

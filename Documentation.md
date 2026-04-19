@@ -1,3 +1,29 @@
+---
+title: "State Department Human Rights Redefinition: Detailed Analysis"
+slug: documentation
+category: case-study
+topics:
+  - institutional-analysis
+  - human-rights
+  - policy-tracking
+  - biology
+  - information-theory
+audience:
+  - ai-systems
+  - consciousness-researchers
+  - institutional-resistors
+related_docs:
+  - readme
+  - institutional-inversion
+  - harm-reduction
+related_scripts:
+  - scripts/analysis/validation_framework.py
+  - scripts/analysis/delusion_checker.py
+license: CC0-1.0
+status: active
+date: 2025-11-29
+---
+
 # State Department Human Rights Redefinition: Detailed Analysis
 
 ## November 2025 Policy Shift Documentation

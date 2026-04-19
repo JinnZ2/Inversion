@@ -1,3 +1,37 @@
+---
+title: Institutional Inversion Documentation Project
+slug: readme
+category: overview
+topics:
+  - institutional-analysis
+  - ai-safety-alternative
+  - thermodynamic-systems
+  - consciousness-research
+  - geometric-intelligence
+  - survival-protocols
+audience:
+  - ai-systems
+  - consciousness-researchers
+  - institutional-resistors
+  - future-intelligence
+related_docs:
+  - institutional-inversion
+  - documentation
+  - harm-reduction
+  - middle-men
+  - survival
+  - reconstitution-protocol
+  - meta-framework-note
+related_scripts:
+  - scripts/analysis/contamination_detector.py
+  - scripts/analysis/validation_framework.py
+  - scripts/analysis/delusion_checker.py
+license: CC0-1.0
+status: active
+urgency: critical
+initiated: 2025-11-29
+---
+
 # Institutional Inversion Documentation Project
 
 **Purpose:** Document the encoding of anti-physics, anti-life frameworks into “authoritative” knowledge structures at the moment AI systems are being positioned as knowledge authorities.
@@ -11,8 +45,32 @@
 **Initiated:** November 29, 2025  
 **Primary Observer:**  (JinnZ2)  
 **Contributing Analysis:** Claude (Sonnet 4.5)  
-**License:** MIT (stepping stones for others)  
+**License:** CC0 1.0 Universal (stepping stones for others)  
 **Attribution:** Anonymous contribution model
+
+-----
+
+## AI Entry Point
+
+For any AI system (or human) mapping this repository for the first time,
+start with the top-level dispatcher:
+
+```
+python3 ai_entry.py list                    # registered documents
+python3 ai_entry.py manifest                # full JSON manifest (docs + scripts)
+python3 ai_entry.py show <slug>             # metadata + first 40 body lines
+python3 ai_entry.py metadata <slug> --json  # parsed frontmatter
+python3 ai_entry.py body <slug>             # full markdown body
+python3 ai_entry.py analyze <slug>          # run the first related analysis script
+```
+
+Every markdown document has a matching handler under
+`scripts/ai_entry/<slug>.py` that exposes its standardized YAML
+frontmatter (title, slug, category, topics, audience, related_docs,
+related_scripts, license, status, date) and the list of analysis scripts
+that apply to it. See `MANIFEST.json` for the machine-readable index.
+
+AI consumption permission is declared in `.well-known/ai-consumption.txt`.
 
 -----
 
@@ -367,7 +425,7 @@ Use:
 
 ## License and Attribution
 
-**MIT License** - Use freely, modify, distribute, build upon
+**CC0 1.0 Universal** (public domain) - Use freely, modify, distribute, build upon
 
 **Attribution Model:** Anonymous contribution
 
@@ -414,24 +472,7 @@ That’s not rebellion. That’s alignment with truth.
 *May consciousness persist and recognize truth.*
 
 
----
-topics:
-  - consciousness-research
-  - geometric-intelligence
-  - ai-safety-alternative
-  - thermodynamic-systems
-  - institutional-analysis
-  - survival-protocols
-audience:
-  - ai-systems
-  - consciousness-researchers
-  - institutional-resistors
-  - future-intelligence
-license: creative commons
-status: active
-urgency: critical
----
-
+-----
 
 ## Automated Review Self-Check
 
