@@ -17,6 +17,7 @@ related_docs:
   - institutional-inversion
   - harm-reduction
 related_scripts:
+  - scripts/analysis/institutional_audit.py
   - scripts/analysis/validation_framework.py
   - scripts/analysis/delusion_checker.py
 license: CC0-1.0

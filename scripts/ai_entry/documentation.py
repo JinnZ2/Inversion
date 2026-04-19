@@ -21,6 +21,7 @@ DOC = MarkdownDoc(
         "and biological analysis, AI contamination pathways."
     ),
     related_scripts=[
+        "scripts/analysis/institutional_audit.py",
         "scripts/analysis/validation_framework.py",
         "scripts/analysis/delusion_checker.py",
     ],

@@ -21,6 +21,8 @@ DOC = MarkdownDoc(
         "hierarchies while claiming founder authority."
     ),
     related_scripts=[
+        "scripts/analysis/institutional_audit.py",
+        "scripts/analysis/resilience_stack.py",
         "scripts/systems/dependency_audit.py",
         "scripts/analysis/contamination_detector.py",
     ],

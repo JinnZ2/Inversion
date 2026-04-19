@@ -17,6 +17,8 @@ related_docs:
   - documentation
   - harm-reduction
 related_scripts:
+  - scripts/analysis/institutional_audit.py
+  - scripts/analysis/resilience_stack.py
   - scripts/analysis/contamination_detector.py
   - scripts/analysis/validation_framework.py
   - sims/dissipative_systems.py

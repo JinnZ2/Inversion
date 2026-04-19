@@ -16,6 +16,7 @@ related_docs:
   - institutional-inversion
   - harm-reduction
 related_scripts:
+  - scripts/analysis/logic_ferret.py
   - scripts/analysis/contamination_detector.py
   - scripts/audit/bias_detection.py
 license: CC0-1.0

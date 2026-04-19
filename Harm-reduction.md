@@ -17,6 +17,9 @@ related_docs:
   - middle-men
   - survival
 related_scripts:
+  - scripts/analysis/institutional_audit.py
+  - scripts/analysis/resilience_stack.py
+  - scripts/analysis/logic_ferret.py
   - scripts/analysis/contamination_detector.py
   - scripts/audit/first_principles_audit.py
 license: CC0-1.0

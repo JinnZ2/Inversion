@@ -38,7 +38,10 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── contamination_detector.py  # Quantitative epistemic quality analysis
 │   │   ├── validation_framework.py    # Multi-epistemological claim validation
 │   │   ├── delusion_checker.py        # Detect systemic assumptions in AI datasets
-│   │   └── fieldlink.py               # Bidirectional bridge to Emotions-as-Sensors
+│   │   ├── fieldlink.py               # Bidirectional bridge to Emotions-as-Sensors
+│   │   ├── resilience_stack.py        # Absence signatures + regulatory scope audit (vendored from thermodynamic-accountability-framework)
+│   │   ├── logic_ferret.py            # Fallacy annotation + C3 integrity score (vendored from Logic-Ferret)
+│   │   └── institutional_audit.py     # Combined rhetorical + resilience audit over a markdown doc
 │   │
 │   ├── audit/                   # Six Sigma DMAIC audit pipeline
 │   │   ├── audit_core.py        # Layer 1: sensitivity, FMEA, capability (Cp/Cpk)
@@ -111,6 +114,8 @@ the manifest with `python3 ai_entry.py manifest --write`.
 **Related projects:**
 - [Seed-physics](https://github.com/JinnZ2/Seed-physics) (referenced in RECONSTITUTION_PROTOCOL.md)
 - [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors) (bidirectional fieldlink via `scripts/analysis/fieldlink.py`)
+- [thermodynamic-accountability-framework](https://github.com/JinnZ2/thermodynamic-accountability-framework) (`resilience_stack` vendored into `scripts/analysis/resilience_stack.py`; keep in sync manually with upstream)
+- [Logic-Ferret](https://github.com/JinnZ2/Logic-Ferret) (`fallacy_overlay` + `truth_integrity_score` vendored into `scripts/analysis/logic_ferret.py`)
 
 ## Key Conventions
 
@@ -183,6 +188,27 @@ python3 scripts/analysis/fieldlink.py --import-sensors data.json --text "..."
 Detects systemic assumptions in AI datasets -- hierarchy, corporation, efficiency, optimization, productivity, economics. Plausibility layer flags physically impossible claims.
 ```
 python3 scripts/analysis/delusion_checker.py README.md --json
+```
+
+**Resilience Stack** (`scripts/analysis/resilience_stack.py`, vendored from [thermodynamic-accountability-framework](https://github.com/JinnZ2/thermodynamic-accountability-framework)):
+Three coupled layers -- (1) AbsenceSignatures for knowledge holes the model cannot see, (2) ConstraintNavigator for bounded-safety problem framing, (3) RegulatoryScopeAudit scoring rules on scope/measurability/expiration/exception-handling/root-cause-link. Produces a cascade vulnerability score.
+```
+python3 scripts/analysis/resilience_stack.py          # demo assessment (JSON)
+```
+
+**Logic-Ferret Adapter** (`scripts/analysis/logic_ferret.py`, vendored from [Logic-Ferret](https://github.com/JinnZ2/Logic-Ferret)):
+Regex-based fallacy annotator (7 patterns) plus the weighted composite truth integrity (C3) score. High C3 = high corruption signal; `fallacy_density_score` is the inverse (1.0 = clean).
+```
+python3 scripts/analysis/logic_ferret.py README.md --json
+python3 scripts/analysis/logic_ferret.py --text "..." --annotate
+```
+
+**Institutional Audit** (`scripts/analysis/institutional_audit.py`):
+Combined pipeline over a markdown document -- runs `logic_ferret.assess_text` on the body and `ResilienceStack.assess` against a repo-specific institutional regulation profile (default / harm-reduction / documentation / middle-men). Emits rhetorical metrics + absences + high-risk regulations + cascade score.
+```
+python3 scripts/analysis/institutional_audit.py Harm-reduction.md
+python3 scripts/analysis/institutional_audit.py Documentation.md --json
+python3 scripts/analysis/institutional_audit.py Middle-men.md --profile middle-men
 ```
 
 **First Principles Audit** (`scripts/audit/first_principles_audit.py`):
