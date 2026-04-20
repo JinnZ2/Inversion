@@ -17,6 +17,7 @@ related_docs:
   - harm-reduction
 related_scripts:
   - scripts/analysis/institutional_audit.py
+  - scripts/analysis/metabolic_accounting.py
   - scripts/analysis/resilience_stack.py
   - scripts/systems/dependency_audit.py
   - scripts/analysis/contamination_detector.py

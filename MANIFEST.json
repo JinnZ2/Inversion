@@ -67,6 +67,7 @@
       ],
       "related_scripts": [
         "scripts/analysis/institutional_audit.py",
+        "scripts/analysis/metabolic_accounting.py",
         "scripts/analysis/resilience_stack.py",
         "scripts/analysis/contamination_detector.py",
         "scripts/analysis/validation_framework.py",
@@ -135,6 +136,7 @@
       ],
       "related_scripts": [
         "scripts/analysis/institutional_audit.py",
+        "scripts/analysis/metabolic_accounting.py",
         "scripts/analysis/resilience_stack.py",
         "scripts/analysis/logic_ferret.py",
         "scripts/analysis/contamination_detector.py",
@@ -169,6 +171,7 @@
       ],
       "related_scripts": [
         "scripts/analysis/institutional_audit.py",
+        "scripts/analysis/metabolic_accounting.py",
         "scripts/analysis/resilience_stack.py",
         "scripts/systems/dependency_audit.py",
         "scripts/analysis/contamination_detector.py"
@@ -282,6 +285,7 @@
       "scripts/analysis/fieldlink.py",
       "scripts/analysis/institutional_audit.py",
       "scripts/analysis/logic_ferret.py",
+      "scripts/analysis/metabolic_accounting.py",
       "scripts/analysis/resilience_stack.py",
       "scripts/analysis/validation_framework.py"
     ],

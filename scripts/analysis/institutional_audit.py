@@ -40,10 +40,12 @@ from pathlib import Path
 try:
     from .resilience_stack import Regulation, ResilienceStack
     from .logic_ferret import assess_text
+    from .metabolic_accounting import classify_cascade_score
 except ImportError:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     from scripts.analysis.resilience_stack import Regulation, ResilienceStack
     from scripts.analysis.logic_ferret import assess_text
+    from scripts.analysis.metabolic_accounting import classify_cascade_score
 
 
 # ---------------------------------------------------------------------------
@@ -425,12 +427,15 @@ def audit_document(
 
     rhetorical = assess_text(body)
 
+    verdict_tier = classify_cascade_score(assessment.cascade_vulnerability_score)
+
     return {
         "document": str(doc_path),
         "profile": profile_key,
         "extract_mode": extract,
         "regulations_audited": len(regulations),
         "extracted_from_body": len(extracted),
+        "verdict_tier": verdict_tier,
         "rhetorical": rhetorical,
         "resilience": {
             "absences_unaccounted": assessment.absences_unaccounted,
@@ -482,6 +487,7 @@ def _main(argv: list[str] | None = None) -> int:
     resil = report["resilience"]
     print(f"document: {report['document']}")
     print(f"profile:  {report['profile']}")
+    print(f"verdict:  {report['verdict_tier']}")
     print(f"regulations_audited: {report['regulations_audited']} (extracted from body: {report['extracted_from_body']})")
     print()
     print("rhetorical:")
