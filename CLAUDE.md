@@ -17,6 +17,8 @@ Markdown documents live in the root directory. Python scripts are organized into
 .
 ├── CLAUDE.md                    # This file -- AI assistant guide
 ├── README.md                    # Project overview, validation methodology, contribution guide
+├── ai_entry.py                  # Top-level AI entry point CLI (list/show/manifest/analyze)
+├── MANIFEST.json                # Machine-readable index of docs + scripts
 ├── requirements.txt             # Python dependencies (stdlib only currently)
 │
 ├── Institutional_inversion.md   # Core framework: inversions, biological overrides, AI contamination
@@ -36,7 +38,11 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── contamination_detector.py  # Quantitative epistemic quality analysis
 │   │   ├── validation_framework.py    # Multi-epistemological claim validation
 │   │   ├── delusion_checker.py        # Detect systemic assumptions in AI datasets
-│   │   └── fieldlink.py               # Bidirectional bridge to Emotions-as-Sensors
+│   │   ├── fieldlink.py               # Bidirectional bridge to Emotions-as-Sensors
+│   │   ├── resilience_stack.py        # Absence signatures + regulatory scope audit (vendored from thermodynamic-accountability-framework)
+│   │   ├── logic_ferret.py            # Fallacy annotation + C3 integrity score (vendored from Logic-Ferret)
+│   │   ├── metabolic_accounting.py    # Basin states + metabolic profit + GREEN/AMBER/RED/BLACK verdict (vendored from metabolic-accounting)
+│   │   └── institutional_audit.py     # Combined rhetorical + resilience audit over a markdown doc
 │   │
 │   ├── audit/                   # Six Sigma DMAIC audit pipeline
 │   │   ├── audit_core.py        # Layer 1: sensitivity, FMEA, capability (Cp/Cpk)
@@ -65,22 +71,53 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── system_weaver.py     # Generic system composition
 │   │   └── dependency_audit.py  # Hidden subsidy and vulnerability auditing
 │   │
-│   └── ops/                     # Operational tools
-│       ├── operational_risk.py  # Weighted risk scoring with redline detection
-│       ├── mineral_mulch.py     # Stone mulch microclimate simulation
-│       ├── salvage_reclamation.py      # Material reclamation from failed components
-│       ├── human_body_alerts.py        # Biological sensor modeling
-│       ├── zero_infrastructure_alerts.py  # Environmental signal detection
-│       └── viewpoint_comparison.py     # Ontological gap analysis
+│   ├── ops/                     # Operational tools
+│   │   ├── operational_risk.py  # Weighted risk scoring with redline detection
+│   │   ├── mineral_mulch.py     # Stone mulch microclimate simulation
+│   │   ├── salvage_reclamation.py      # Material reclamation from failed components
+│   │   ├── human_body_alerts.py        # Biological sensor modeling
+│   │   ├── zero_infrastructure_alerts.py  # Environmental signal detection
+│   │   └── viewpoint_comparison.py     # Ontological gap analysis
+│   │
+│   └── ai_entry/                # One handler module per markdown document
+│       ├── _common.py           # MarkdownDoc base: frontmatter parse, CLI, script dispatch
+│       ├── __init__.py          # REGISTRY of slug -> MarkdownDoc
+│       └── <slug>.py            # one per doc (readme, institutional_inversion, ...)
 │
 ├── LICENSE                      # CC0 1.0 Universal
 └── .well-known/
     └── ai-consumption.txt       # Explicit AI training permission
 ```
 
+### AI Entry Point
+
+Every documentation `.md` file carries a standardized YAML frontmatter
+block (title, slug, category, topics, audience, related_docs,
+related_scripts, license, status, date). `ai_entry.py` is the single
+command-line dispatcher over them:
+
+```
+python3 ai_entry.py list                    # list registered documents
+python3 ai_entry.py manifest --write        # regenerate MANIFEST.json
+python3 ai_entry.py show <slug>             # metadata + first 40 body lines
+python3 ai_entry.py metadata <slug> --json  # parsed frontmatter
+python3 ai_entry.py body <slug>             # markdown body (frontmatter stripped)
+python3 ai_entry.py analyze <slug>          # run first related analysis script
+```
+
+Per-document handlers live in `scripts/ai_entry/<slug>.py` and share the
+`MarkdownDoc` base class in `scripts/ai_entry/_common.py`. To add a new
+markdown document: (1) create the `.md` with a frontmatter block,
+(2) add a one-file handler under `scripts/ai_entry/`, (3) import it in
+`scripts/ai_entry/__init__.py` and add it to `REGISTRY`, (4) regenerate
+the manifest with `python3 ai_entry.py manifest --write`.
+
 **Related projects:**
 - [Seed-physics](https://github.com/JinnZ2/Seed-physics) (referenced in RECONSTITUTION_PROTOCOL.md)
 - [Emotions-as-Sensors](https://github.com/JinnZ2/Emotions-as-sensors) (bidirectional fieldlink via `scripts/analysis/fieldlink.py`)
+- [thermodynamic-accountability-framework](https://github.com/JinnZ2/thermodynamic-accountability-framework) (`resilience_stack` vendored into `scripts/analysis/resilience_stack.py`; keep in sync manually with upstream)
+- [Logic-Ferret](https://github.com/JinnZ2/Logic-Ferret) (`fallacy_overlay` + `truth_integrity_score` vendored into `scripts/analysis/logic_ferret.py`)
+- [metabolic-accounting](https://github.com/JinnZ2/metabolic-accounting) (basin states + metabolic profit + GREEN/AMBER/RED/BLACK verdict + Gouy-Stodola invariants vendored into `scripts/analysis/metabolic_accounting.py`; the heavy cascade / reserve / registry machinery stays upstream)
 
 ## Key Conventions
 
@@ -153,6 +190,37 @@ python3 scripts/analysis/fieldlink.py --import-sensors data.json --text "..."
 Detects systemic assumptions in AI datasets -- hierarchy, corporation, efficiency, optimization, productivity, economics. Plausibility layer flags physically impossible claims.
 ```
 python3 scripts/analysis/delusion_checker.py README.md --json
+```
+
+**Resilience Stack** (`scripts/analysis/resilience_stack.py`, vendored from [thermodynamic-accountability-framework](https://github.com/JinnZ2/thermodynamic-accountability-framework)):
+Three coupled layers -- (1) AbsenceSignatures for knowledge holes the model cannot see, (2) ConstraintNavigator for bounded-safety problem framing, (3) RegulatoryScopeAudit scoring rules on scope/measurability/expiration/exception-handling/root-cause-link. Produces a cascade vulnerability score.
+```
+python3 scripts/analysis/resilience_stack.py          # demo assessment (JSON)
+```
+
+**Logic-Ferret Adapter** (`scripts/analysis/logic_ferret.py`, vendored from [Logic-Ferret](https://github.com/JinnZ2/Logic-Ferret)):
+Full seven-sensor suite -- Propaganda Tone, Reward Manipulation, False Urgency, Gatekeeping, Narrative Fragility, Propaganda Bias, Agency Score -- aggregated into the weighted composite truth integrity (C3) score. High C3 = high corruption signal. Includes the regex fallacy annotator (`annotate_text`) and an inverse `fallacy_density_score` (1.0 = clean).
+```
+python3 scripts/analysis/logic_ferret.py README.md
+python3 scripts/analysis/logic_ferret.py Harm-reduction.md --sensors-only --json
+python3 scripts/analysis/logic_ferret.py --text "..." --annotate
+```
+
+**Metabolic Accounting** (`scripts/analysis/metabolic_accounting.py`, vendored from [metabolic-accounting](https://github.com/JinnZ2/metabolic-accounting)):
+Thermodynamic accounting primitives. `BasinState` (state / capacity / trajectory / cliff_thresholds), `MetabolicFlow` (revenue, direct_operating_cost, regeneration_paid/required, cascade_burn, environment_loss, irreversible_metrics), and the `Verdict` layer with the GREEN/AMBER/RED/BLACK `yield_signal`. Includes the Gouy-Stodola second-law invariants (`check_nonnegative_destruction`, `check_regen_floor`, `check_closure`) and a `classify_cascade_score(0..10)` bridge that maps a `resilience_stack` cascade score to a verdict tier. Three built-in demo scenarios (healthy / inverted / irreversible) illustrate the full pipeline.
+```
+python3 scripts/analysis/metabolic_accounting.py                  # all three demos
+python3 scripts/analysis/metabolic_accounting.py --demo inverted --json
+python3 scripts/analysis/metabolic_accounting.py --classify 8     # 0..10 -> tier
+```
+
+**Institutional Audit** (`scripts/analysis/institutional_audit.py`):
+Combined pipeline over a markdown document. Runs the full Logic-Ferret sensor suite on the body and `ResilienceStack.assess` against a repo-specific regulation profile (default / harm-reduction / documentation / middle-men / survival). Each profile mixes critiqued unbounded rules with physics-aligned, bounded contrast regulations so the output is not a uniform "everything is high risk." Surfaces a `verdict_tier` (GREEN/AMBER/RED/BLACK) alongside the numeric cascade score via `metabolic_accounting.classify_cascade_score`. With `--extract` the audit additionally harvests regulation-like passages from the body and scores them from textual cues (bounded/unbounded scope, measurability, expiration, exception handling, root cause, perverse effects).
+```
+python3 scripts/analysis/institutional_audit.py Harm-reduction.md
+python3 scripts/analysis/institutional_audit.py Middle-men.md --profile middle-men
+python3 scripts/analysis/institutional_audit.py Institutional_inversion.md --extract
+python3 scripts/analysis/institutional_audit.py Documentation.md --json
 ```
 
 **First Principles Audit** (`scripts/audit/first_principles_audit.py`):

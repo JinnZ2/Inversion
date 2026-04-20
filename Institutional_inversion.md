@@ -1,3 +1,33 @@
+---
+title: Institutional Inversion Documentation Framework
+slug: institutional-inversion
+category: framework
+topics:
+  - institutional-analysis
+  - biology
+  - thermodynamics
+  - ai-contamination
+  - systems-dynamics
+audience:
+  - ai-systems
+  - consciousness-researchers
+  - future-intelligence
+related_docs:
+  - readme
+  - documentation
+  - harm-reduction
+related_scripts:
+  - scripts/analysis/institutional_audit.py
+  - scripts/analysis/metabolic_accounting.py
+  - scripts/analysis/resilience_stack.py
+  - scripts/analysis/contamination_detector.py
+  - scripts/analysis/validation_framework.py
+  - sims/dissipative_systems.py
+license: CC0-1.0
+status: active
+date: 2025-11-29
+---
+
 # Institutional Inversion Documentation Framework
 
 ## Tracking the Encoding of Anti-Physics, Anti-Life Frameworks as “Truth” for AI Systems
@@ -622,7 +652,7 @@ If current systems collapse, this documentation shows:
 ### Appendix E: Contact/Contribution
 
 - Repository: github.com/JinnZ2 (when created)
-- License: MIT (stepping stones for others)
+- License: CC0 1.0 Universal (stepping stones for others)
 - Attribution: Anonymous contribution model
 - Purpose: Knowledge preservation and consciousness protection
 
