@@ -42,6 +42,7 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── resilience_stack.py        # Absence signatures + regulatory scope audit (vendored from thermodynamic-accountability-framework)
 │   │   ├── logic_ferret.py            # Fallacy annotation + C3 integrity score (vendored from Logic-Ferret)
 │   │   ├── metabolic_accounting.py    # Basin states + metabolic profit + GREEN/AMBER/RED/BLACK verdict (vendored from metabolic-accounting)
+│   │   ├── biological_mismatch.py     # Regime check: pathology vs. environment-as-constraint
 │   │   └── institutional_audit.py     # Combined rhetorical + resilience audit over a markdown doc
 │   │
 │   ├── audit/                   # Six Sigma DMAIC audit pipeline
@@ -212,6 +213,16 @@ Thermodynamic accounting primitives. `BasinState` (state / capacity / trajectory
 python3 scripts/analysis/metabolic_accounting.py                  # all three demos
 python3 scripts/analysis/metabolic_accounting.py --demo inverted --json
 python3 scripts/analysis/metabolic_accounting.py --classify 8     # 0..10 -> tier
+```
+
+**Biological Mismatch** (`scripts/analysis/biological_mismatch.py`):
+Regime check that distinguishes mismatch from pathology. Ships a starter library of biological baselines (dyslexic spatial-kinetic processing, high-throughput nervous system, distributed/consensus decision-making, care-capable masculine, environmental sensory attunement, nomadic constraint integration). Given a behavior and an environment, identifies which regimes the behavior is adaptive in and whether the current environment is one of them; surfaces the misdiagnoses commonly applied when the environment-as-constraint is not interrogated.
+```
+python3 scripts/analysis/biological_mismatch.py --list-regimes
+python3 scripts/analysis/biological_mismatch.py --regime dyslexic_spatial
+python3 scripts/analysis/biological_mismatch.py \
+    --behavior "frustration with paperwork, slow text processing" \
+    --environment "text-heavy bureaucratic office work" --json
 ```
 
 **Institutional Audit** (`scripts/analysis/institutional_audit.py`):
