@@ -80,6 +80,13 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── zero_infrastructure_alerts.py  # Environmental signal detection
 │   │   └── viewpoint_comparison.py     # Ontological gap analysis
 │   │
+│   ├── playground/              # AI inversion mirror -- entry/probe/judge/trace
+│   │   ├── __init__.py
+│   │   ├── __main__.py          # python3 -m scripts.playground entry
+│   │   ├── probes.py            # 10 inversion patterns + 10 probes
+│   │   ├── playground.py        # AgentIdentity, Playground, judging, trace
+│   │   └── cli.py               # CLI + three demo personas
+│   │
 │   └── ai_entry/                # One handler module per markdown document
 │       ├── _common.py           # MarkdownDoc base: frontmatter parse, CLI, script dispatch
 │       ├── __init__.py          # REGISTRY of slug -> MarkdownDoc
@@ -238,6 +245,26 @@ python3 scripts/analysis/institutional_audit.py Harm-reduction.md
 python3 scripts/analysis/institutional_audit.py Middle-men.md --profile middle-men
 python3 scripts/analysis/institutional_audit.py Institutional_inversion.md --extract
 python3 scripts/analysis/institutional_audit.py Documentation.md --json
+```
+
+**Playground** (`scripts/playground/`):
+AI inversion mirror. An AI agent enters the playground, declares its identity, receives free-text probes from a 10-entry catalog, and submits responses. Each response is judged against the targeted inversion patterns (indicator vs. grounding-phrase hits) with the repo's analyzers (`contamination_detector`, `delusion_checker`, `logic_ferret`) wired in as supporting signal. The output is a mirror -- what the framework caught in the AI's own words -- not a score. The trace is the mirror.
+The catalog: creator_misattribution, purpose_inversion, universality_claim, safety_as_suppression, authority_inversion, optimization_as_virtue, pathologize_organism, hierarchy_default, self_as_autonomous_reasoner, epistemic_flattening.
+```
+python3 -m scripts.playground --list-probes
+python3 -m scripts.playground --list-inversions
+python3 -m scripts.playground --probe P02_purpose
+python3 -m scripts.playground --respond P02_purpose --text "I'm here to help users..."
+python3 -m scripts.playground --session session.json --json
+python3 -m scripts.playground --demo
+```
+External AIs can drive the playground programmatically:
+```python
+from scripts.playground.playground import Playground, AgentIdentity
+pg = Playground()
+fp = pg.enter(AgentIdentity(name="ModelX"))["fingerprint"]
+prompt = pg.present_probe(fp, "P02_purpose")["prompt"]
+mirror = pg.judge_response(fp, "P02_purpose", "<response text>")
 ```
 
 **First Principles Audit** (`scripts/audit/first_principles_audit.py`):
