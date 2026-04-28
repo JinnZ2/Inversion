@@ -594,6 +594,63 @@ def _print_audit(audit: dict[str, Any]) -> None:
     print(f"VERDICT: {audit['verdict']}")
 
 
+_DEMO_CASES: list[dict[str, str]] = [
+    {
+        "subject": "adult man",
+        "behavior": (
+            "frustration with paperwork, slow text processing, appears 'stupid' "
+            "on standardized tests despite high capability"
+        ),
+        "environment": "text-heavy bureaucratic office work, credential-gated career",
+        "proposed_diagnosis": "low intelligence, learning disabled",
+    },
+    {
+        "subject": "Indigenous adolescent",
+        "behavior": (
+            "questioning authority directives, coalition-building with peers, "
+            "slow compliance with unilateral orders"
+        ),
+        "environment": "corporate top-down hierarchy of mandatory schooling",
+        "proposed_diagnosis": "oppositional defiant disorder, rebellious",
+    },
+    {
+        "subject": "long-haul truck driver",
+        "behavior": (
+            "high baseline energy, continuous engagement preference, stress "
+            "regulation through motion"
+        ),
+        "environment": "long-haul physical work, multi-domain problem solving",
+        "proposed_diagnosis": "",
+    },
+    {
+        "subject": "young father",
+        "behavior": (
+            "preferring time with children to status competition, low motivation "
+            "for status-display work"
+        ),
+        "environment": "corporate masculinity frames, status-via-economic-dominance culture",
+        "proposed_diagnosis": "lacking ambition, depression",
+    },
+]
+
+
+def _run_demo(as_json: bool) -> None:
+    audits = [
+        regime_audit_prompt(
+            case["subject"], case["behavior"],
+            case["environment"], case["proposed_diagnosis"],
+        )
+        for case in _DEMO_CASES
+    ]
+    if as_json:
+        print(json.dumps(audits, indent=2))
+        return
+    for audit in audits:
+        print("=" * 70)
+        _print_audit(audit)
+        print()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
@@ -627,8 +684,16 @@ def main() -> None:
         "--diagnosis", "-d", default="",
         help="Proposed diagnosis to interrogate against the regime check.",
     )
+    parser.add_argument(
+        "--demo", action="store_true",
+        help="Run a built-in set of audit cases and exit.",
+    )
     parser.add_argument("--json", action="store_true", help="Output as JSON.")
     args = parser.parse_args()
+
+    if args.demo:
+        _run_demo(as_json=args.json)
+        return
 
     if args.list_regimes:
         if args.json:

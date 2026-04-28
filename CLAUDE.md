@@ -216,13 +216,19 @@ python3 scripts/analysis/metabolic_accounting.py --classify 8     # 0..10 -> tie
 ```
 
 **Biological Mismatch** (`scripts/analysis/biological_mismatch.py`):
-Regime check that distinguishes mismatch from pathology. Ships a starter library of biological baselines (dyslexic spatial-kinetic processing, high-throughput nervous system, distributed/consensus decision-making, care-capable masculine, environmental sensory attunement, nomadic constraint integration). Given a behavior and an environment, identifies which regimes the behavior is adaptive in and whether the current environment is one of them; surfaces the misdiagnoses commonly applied when the environment-as-constraint is not interrogated.
+Regime check that distinguishes mismatch from pathology. Ships a starter library of biological baselines (dyslexic spatial-kinetic processing, high-throughput nervous system, distributed/consensus decision-making, care-capable masculine, environmental sensory attunement, nomadic constraint integration). Given a behavior and an environment, identifies which regimes the behavior is adaptive in and whether the current environment is one of them; surfaces the misdiagnoses commonly applied when the environment-as-constraint is not interrogated. With `--subject` or `--diagnosis`, switches to audit-prompt mode (`regime_audit_prompt`), which adds the audit questions and a verdict that escalates to CRITICAL when the proposed diagnosis matches a known misdiagnosis pattern.
 ```
 python3 scripts/analysis/biological_mismatch.py --list-regimes
 python3 scripts/analysis/biological_mismatch.py --regime dyslexic_spatial
 python3 scripts/analysis/biological_mismatch.py \
     --behavior "frustration with paperwork, slow text processing" \
     --environment "text-heavy bureaucratic office work" --json
+python3 scripts/analysis/biological_mismatch.py \
+    --subject "adult man" \
+    --behavior "frustration with paperwork, low test scores despite high capability" \
+    --environment "text-heavy bureaucratic office work, credential-gated career" \
+    --diagnosis "low intelligence, learning disabled"
+python3 scripts/analysis/biological_mismatch.py --demo
 ```
 
 **Institutional Audit** (`scripts/analysis/institutional_audit.py`):
