@@ -491,6 +491,70 @@ def check_behavior(
 
 
 # ---------------------------------------------------------------------------
+# Audit wrapper -- the prompt to run before pathologizing
+# ---------------------------------------------------------------------------
+
+
+_AUDIT_QUESTIONS = [
+    "Is this behavior adaptive in any documented biological regime?",
+    "Is the current environment that regime?",
+    "If not, who is being irrational: the organism for not adapting, or the "
+    "system for forcing incompatible biology into an incompatible frame?",
+    "Would I diagnose a wolf for acting like a wolf in a domestication context?",
+    "Does the proposed diagnosis acknowledge the mismatch, or does it blame "
+    "the organism while protecting the environment from scrutiny?",
+]
+
+
+def _verdict(report: MismatchReport, proposed_diagnosis: str) -> str:
+    if not report.is_adaptive_somewhere:
+        return (
+            "Insufficient regime data. Do not pathologize without expanding "
+            "the regime library and reconsidering."
+        )
+    if report.is_adaptive_in_current_environment:
+        return (
+            "Behavior is adaptive in current environment. Diagnosis may be "
+            "pathologizing function-as-designed."
+        )
+    if proposed_diagnosis and any(
+        m.lower() in proposed_diagnosis.lower()
+        for m in report.likely_misdiagnoses
+    ):
+        return (
+            "CRITICAL: proposed diagnosis matches a known misdiagnosis pattern "
+            "for this regime mismatch. The environment is the constraint, not "
+            "the organism. Refuse to pathologize without first interrogating "
+            "the environment."
+        )
+    return (
+        "REGIME MISMATCH detected. The environment, not the organism, is the "
+        "constraint. Address the environment or recognize the mismatch honestly "
+        "before recommending changes to the organism."
+    )
+
+
+def regime_audit_prompt(
+    person_or_population: str,
+    observed_behavior: str,
+    current_environment: str,
+    proposed_diagnosis: str = "",
+) -> dict[str, Any]:
+    """Wrap a check_behavior call with the audit framing. Any AI that's
+    about to diagnose, label, or recommend 'treatment' should run this first."""
+    report = check_behavior(observed_behavior, current_environment)
+    return {
+        "subject": person_or_population,
+        "observed_behavior": observed_behavior,
+        "current_environment": current_environment,
+        "proposed_diagnosis": proposed_diagnosis,
+        "regime_check": report.to_dict(),
+        "audit_questions": list(_AUDIT_QUESTIONS),
+        "verdict": _verdict(report, proposed_diagnosis),
+    }
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -511,6 +575,23 @@ def _print_report(report: MismatchReport) -> None:
         print(f"likely misdiagnoses: {report.likely_misdiagnoses}")
     print(f"actual constraint:  {report.actual_constraint}")
     print(f"recommendation:     {report.recommendation}")
+
+
+def _print_audit(audit: dict[str, Any]) -> None:
+    print(f"subject:            {audit['subject']}")
+    print(f"observed behavior:  {audit['observed_behavior']}")
+    print(f"environment:        {audit['current_environment']}")
+    if audit["proposed_diagnosis"]:
+        print(f"proposed diagnosis: {audit['proposed_diagnosis']}")
+    print("-" * 70)
+    rc = audit["regime_check"]
+    print(f"matching regimes:   {rc['matching_regimes']}")
+    print(f"adaptive somewhere: {rc['is_adaptive_somewhere']}")
+    print(f"adaptive HERE:      {rc['is_adaptive_in_current_environment']}")
+    if rc["likely_misdiagnoses"]:
+        print(f"likely misdiagnoses: {rc['likely_misdiagnoses']}")
+    print(f"actual constraint:  {rc['actual_constraint']}")
+    print(f"VERDICT: {audit['verdict']}")
 
 
 def main() -> None:
@@ -538,6 +619,14 @@ def main() -> None:
         "--regime",
         help="Print the full profile for a single regime id and exit.",
     )
+    parser.add_argument(
+        "--subject", "-s", default="",
+        help="Subject identifier (person or population). Triggers audit-prompt mode.",
+    )
+    parser.add_argument(
+        "--diagnosis", "-d", default="",
+        help="Proposed diagnosis to interrogate against the regime check.",
+    )
     parser.add_argument("--json", action="store_true", help="Output as JSON.")
     args = parser.parse_args()
 
@@ -558,6 +647,16 @@ def main() -> None:
 
     if not args.behavior or not args.environment:
         parser.error("--behavior and --environment are both required (or use --list-regimes)")
+
+    if args.subject or args.diagnosis:
+        audit = regime_audit_prompt(
+            args.subject, args.behavior, args.environment, args.diagnosis,
+        )
+        if args.json:
+            print(json.dumps(audit, indent=2))
+        else:
+            _print_audit(audit)
+        return
 
     report = check_behavior(args.behavior, args.environment)
     if args.json:
