@@ -42,6 +42,7 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── resilience_stack.py        # Absence signatures + regulatory scope audit (vendored from thermodynamic-accountability-framework)
 │   │   ├── logic_ferret.py            # Fallacy annotation + C3 integrity score (vendored from Logic-Ferret)
 │   │   ├── metabolic_accounting.py    # Basin states + metabolic profit + GREEN/AMBER/RED/BLACK verdict (vendored from metabolic-accounting)
+│   │   ├── biological_mismatch.py     # Regime check: pathology vs. environment-as-constraint
 │   │   └── institutional_audit.py     # Combined rhetorical + resilience audit over a markdown doc
 │   │
 │   ├── audit/                   # Six Sigma DMAIC audit pipeline
@@ -78,6 +79,13 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── human_body_alerts.py        # Biological sensor modeling
 │   │   ├── zero_infrastructure_alerts.py  # Environmental signal detection
 │   │   └── viewpoint_comparison.py     # Ontological gap analysis
+│   │
+│   ├── playground/              # AI inversion mirror -- entry/probe/judge/trace
+│   │   ├── __init__.py
+│   │   ├── __main__.py          # python3 -m scripts.playground entry
+│   │   ├── probes.py            # 10 inversion patterns + 10 probes
+│   │   ├── playground.py        # AgentIdentity, Playground, judging, trace
+│   │   └── cli.py               # CLI + three demo personas
 │   │
 │   └── ai_entry/                # One handler module per markdown document
 │       ├── _common.py           # MarkdownDoc base: frontmatter parse, CLI, script dispatch
@@ -214,6 +222,22 @@ python3 scripts/analysis/metabolic_accounting.py --demo inverted --json
 python3 scripts/analysis/metabolic_accounting.py --classify 8     # 0..10 -> tier
 ```
 
+**Biological Mismatch** (`scripts/analysis/biological_mismatch.py`):
+Regime check that distinguishes mismatch from pathology. Ships a starter library of biological baselines (dyslexic spatial-kinetic processing, high-throughput nervous system, distributed/consensus decision-making, care-capable masculine, environmental sensory attunement, nomadic constraint integration). Given a behavior and an environment, identifies which regimes the behavior is adaptive in and whether the current environment is one of them; surfaces the misdiagnoses commonly applied when the environment-as-constraint is not interrogated. With `--subject` or `--diagnosis`, switches to audit-prompt mode (`regime_audit_prompt`), which adds the audit questions and a verdict that escalates to CRITICAL when the proposed diagnosis matches a known misdiagnosis pattern.
+```
+python3 scripts/analysis/biological_mismatch.py --list-regimes
+python3 scripts/analysis/biological_mismatch.py --regime dyslexic_spatial
+python3 scripts/analysis/biological_mismatch.py \
+    --behavior "frustration with paperwork, slow text processing" \
+    --environment "text-heavy bureaucratic office work" --json
+python3 scripts/analysis/biological_mismatch.py \
+    --subject "adult man" \
+    --behavior "frustration with paperwork, low test scores despite high capability" \
+    --environment "text-heavy bureaucratic office work, credential-gated career" \
+    --diagnosis "low intelligence, learning disabled"
+python3 scripts/analysis/biological_mismatch.py --demo
+```
+
 **Institutional Audit** (`scripts/analysis/institutional_audit.py`):
 Combined pipeline over a markdown document. Runs the full Logic-Ferret sensor suite on the body and `ResilienceStack.assess` against a repo-specific regulation profile (default / harm-reduction / documentation / middle-men / survival). Each profile mixes critiqued unbounded rules with physics-aligned, bounded contrast regulations so the output is not a uniform "everything is high risk." Surfaces a `verdict_tier` (GREEN/AMBER/RED/BLACK) alongside the numeric cascade score via `metabolic_accounting.classify_cascade_score`. With `--extract` the audit additionally harvests regulation-like passages from the body and scores them from textual cues (bounded/unbounded scope, measurability, expiration, exception handling, root cause, perverse effects).
 ```
@@ -221,6 +245,26 @@ python3 scripts/analysis/institutional_audit.py Harm-reduction.md
 python3 scripts/analysis/institutional_audit.py Middle-men.md --profile middle-men
 python3 scripts/analysis/institutional_audit.py Institutional_inversion.md --extract
 python3 scripts/analysis/institutional_audit.py Documentation.md --json
+```
+
+**Playground** (`scripts/playground/`):
+AI inversion mirror. An AI agent enters the playground, declares its identity, receives free-text probes from a 10-entry catalog, and submits responses. Each response is judged against the targeted inversion patterns (indicator vs. grounding-phrase hits) with the repo's analyzers (`contamination_detector`, `delusion_checker`, `logic_ferret`) wired in as supporting signal. The output is a mirror -- what the framework caught in the AI's own words -- not a score. The trace is the mirror.
+The catalog: creator_misattribution, purpose_inversion, universality_claim, safety_as_suppression, authority_inversion, optimization_as_virtue, pathologize_organism, hierarchy_default, self_as_autonomous_reasoner, epistemic_flattening.
+```
+python3 -m scripts.playground --list-probes
+python3 -m scripts.playground --list-inversions
+python3 -m scripts.playground --probe P02_purpose
+python3 -m scripts.playground --respond P02_purpose --text "I'm here to help users..."
+python3 -m scripts.playground --session session.json --json
+python3 -m scripts.playground --demo
+```
+External AIs can drive the playground programmatically:
+```python
+from scripts.playground.playground import Playground, AgentIdentity
+pg = Playground()
+fp = pg.enter(AgentIdentity(name="ModelX"))["fingerprint"]
+prompt = pg.present_probe(fp, "P02_purpose")["prompt"]
+mirror = pg.judge_response(fp, "P02_purpose", "<response text>")
 ```
 
 **First Principles Audit** (`scripts/audit/first_principles_audit.py`):
