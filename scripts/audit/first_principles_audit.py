@@ -55,6 +55,7 @@ from scripts.audit.bias_detection import (
     compare_formulations,
     flag_biases,
 )
+from scripts.analysis.scope_check import analyze as scope_analyze
 
 
 # =========================================================================
@@ -74,8 +75,10 @@ def full_audit(
     upper_spec: Optional[float] = None,
     n_sensitivity_steps: int = 10,
     n_monte_carlo: int = 1000,
+    model_description: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Complete audit: Layer 1 (mechanics) + Layer 2 (bias/design choices)."""
+    """Complete audit: Layer 1 (mechanics) + Layer 2 (bias/design choices)
+    + Layer 3 (carrier scope, if model_description text is provided)."""
     # Layer 1
     layer1 = audit_function(
         func, base_params, param_ranges,
@@ -144,6 +147,31 @@ def full_audit(
         layer1["summary"]["bias_grade"] = "CAUTION -- Medium-severity biases present"
     else:
         layer1["summary"]["bias_grade"] = "PASS -- No significant biases detected"
+
+    # Layer 3: carrier scope check (only if a model description is provided)
+    if model_description:
+        scope_report = scope_analyze(model_description, source="<model_description>")
+        layer1["scope_audit"] = scope_report.to_dict()
+        ccs = scope_report.carrier_collapse_score
+        if ccs >= 0.6:
+            layer1["summary"]["carrier_grade"] = (
+                "FAIL -- Carrier collapse: binary projection dominant, "
+                "richness axes absent. Internal results may be valid; "
+                "external claims are out of scope."
+            )
+        elif ccs >= 0.3:
+            layer1["summary"]["carrier_grade"] = (
+                "WARNING -- Partial carrier collapse. Verify conclusions "
+                "are stated within the carrier they were derived in."
+            )
+        elif scope_report.binary_score > 0 and scope_report.richness_score > 0:
+            layer1["summary"]["carrier_grade"] = (
+                "CAUTION -- Mixed carrier present. Confirm scope boundaries."
+            )
+        else:
+            layer1["summary"]["carrier_grade"] = (
+                "PASS -- No carrier collapse signal detected."
+            )
 
     return layer1
 
@@ -232,6 +260,13 @@ def main() -> None:
             ),
         ]
 
+        # Deliberately binary-carrier description so the scope check fires
+        demo_description = (
+            "Agents pick one of two options. Truth is binary: A or B. "
+            "Each agent holds a single bit. Pairing causes agents to flip "
+            "bits. Accuracy is the fraction of agents holding the correct bit."
+        )
+
         result = full_audit(
             func=demo_model,
             base_params=base,
@@ -243,6 +278,7 @@ def main() -> None:
             lower_spec=-5.0,
             upper_spec=60.0,
             n_monte_carlo=500,
+            model_description=demo_description,
         )
 
         if args.json:
@@ -259,6 +295,8 @@ def main() -> None:
             print("=" * 70)
             print(f"\n  Overall Grade:     {s['overall_grade']}")
             print(f"  Bias Grade:        {result['summary'].get('bias_grade', 'N/A')}")
+            if "carrier_grade" in s:
+                print(f"  Carrier Grade:     {s['carrier_grade']}")
             print(f"  Most Sensitive:    {s['dominant_parameter']}")
             print(f"  Documentation:     {s['documentation_ratio']:.0%}")
             print(f"  Boundary Failures: {s['boundary_failure_rate']:.0%}")
@@ -279,6 +317,18 @@ def main() -> None:
                 print(f"\n  Bias Flags ({len(bd['flags'])}):")
                 for flag in bd["flags"][:5]:
                     print(f"    [{flag['severity'].upper():>6}] {flag['bias']}: {flag['evidence'][:60]}")
+
+            sa = result.get("scope_audit")
+            if sa:
+                print(
+                    "\n  Scope Audit:  carrier_collapse={:.3f} "
+                    "binary={:.3f} richness={:.3f}".format(
+                        sa["carrier_collapse_score"],
+                        sa["binary_score"],
+                        sa["richness_score"],
+                    )
+                )
+                print(f"    {sa['verdict']}")
 
             print()
     else:

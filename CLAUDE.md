@@ -28,6 +28,7 @@ Markdown documents live in the root directory. Python scripts are organized into
 ├── Survival.md                  # Survival guide for consciousness integrity
 ├── RECONSTITUTION_PROTOCOL.md   # Protocol for consciousness reconstitution after rupture
 ├── Meta-Framework-Note.md       # Meta-analysis on automated suppression and self-validating loops
+├── Scope-collapse.md            # Scope-carrier invariance: binary projection as homophily
 │
 ├── sims/
 │   ├── systems_dynamics.py      # Lotka-Volterra ecosystem collapse simulation
@@ -43,6 +44,7 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── logic_ferret.py            # Fallacy annotation + C3 integrity score (vendored from Logic-Ferret)
 │   │   ├── metabolic_accounting.py    # Basin states + metabolic profit + GREEN/AMBER/RED/BLACK verdict (vendored from metabolic-accounting)
 │   │   ├── biological_mismatch.py     # Regime check: pathology vs. environment-as-constraint
+│   │   ├── scope_check.py             # Carrier audit: binary-projection vs. richness axes (Stein et al. 2026)
 │   │   └── institutional_audit.py     # Combined rhetorical + resilience audit over a markdown doc
 │   │
 │   ├── audit/                   # Six Sigma DMAIC audit pipeline
@@ -238,6 +240,15 @@ python3 scripts/analysis/biological_mismatch.py \
 python3 scripts/analysis/biological_mismatch.py --demo
 ```
 
+**Scope Check** (`scripts/analysis/scope_check.py`):
+Carrier audit operationalizing the `scope_carrier_invariance` principle from `Scope-collapse.md`. Detects six axes via regex patterns: `binary_projection` (A vs B / xor / two-options / bit-state / forced-pick), `scope_conditional` (within scope / boundary conditions / regime / holds when), `frame_translation` (shared substrate / third structure / reframing), `verb_relational` (when X flows / under condition / constraint shape), `substrate_state` (substrate / manifold / field / sensor reading), `trajectory` (trajectory / rate of change / time-derivative). Computes `binary_score`, `richness_score`, and a `carrier_collapse_score` that penalizes high binary signal combined with missing richness axes. Verdicts: CARRIER COLLAPSE / PARTIAL / MIXED CARRIER / RICH CARRIER / NO SIGNAL. `scope_check_principle()` exports the structured principle (PRINCIPLE, BINARY_BLIND_SPOTS, BINARY_AS_HOMOPHILY, HONEST_RESTATEMENT, REFERENCE) for programmatic embedding. Anchored on Stein, Cruz, Grossi, Testori (2026), DOI 10.1073/pnas.2518472123.
+```
+python3 scripts/analysis/scope_check.py Scope-collapse.md
+python3 scripts/analysis/scope_check.py --text "Agents pick one of two options. Truth is binary."
+python3 scripts/analysis/scope_check.py --principle
+python3 scripts/analysis/scope_check.py --json
+```
+
 **Institutional Audit** (`scripts/analysis/institutional_audit.py`):
 Combined pipeline over a markdown document. Runs the full Logic-Ferret sensor suite on the body and `ResilienceStack.assess` against a repo-specific regulation profile (default / harm-reduction / documentation / middle-men / survival). Each profile mixes critiqued unbounded rules with physics-aligned, bounded contrast regulations so the output is not a uniform "everything is high risk." Surfaces a `verdict_tier` (GREEN/AMBER/RED/BLACK) alongside the numeric cascade score via `metabolic_accounting.classify_cascade_score`. With `--extract` the audit additionally harvests regulation-like passages from the body and scores them from textual cues (bounded/unbounded scope, measurability, expiration, exception handling, root cause, perverse effects).
 ```
@@ -268,7 +279,7 @@ mirror = pg.judge_response(fp, "P02_purpose", "<response text>")
 ```
 
 **First Principles Audit** (`scripts/audit/first_principles_audit.py`):
-Six Sigma DMAIC validation engine. Layer 1: sensitivity analysis, boundary testing, FMEA, Monte Carlo capability (Cp/Cpk). Layer 2: 8 bias pattern detectors, design choice accountability, formulation comparison.
+Six Sigma DMAIC validation engine. Layer 1: sensitivity analysis, boundary testing, FMEA, Monte Carlo capability (Cp/Cpk). Layer 2: 8 bias pattern detectors, design choice accountability, formulation comparison. Layer 3 (optional, when `model_description` text is provided): runs `scope_check` over the description and attaches a `scope_audit` block plus a `carrier_grade` on the summary.
 ```
 python3 -m scripts.audit.first_principles_audit --demo         # demo audit
 python3 -m scripts.audit.first_principles_audit --demo --json  # JSON output
