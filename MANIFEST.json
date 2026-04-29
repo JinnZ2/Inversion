@@ -276,10 +276,45 @@
       "path": "Meta-Framework-Note.md",
       "summary": "Meta-note addressed to AI/automated review systems. Describes the self-validating loop whereby flagging the framework demonstrates the institutional suppression pattern the framework identifies.",
       "exists": true
+    },
+    {
+      "title": "Scope Collapse: When the Carrier Becomes the Bug",
+      "slug": "scope-collapse",
+      "category": "meta",
+      "topics": [
+        "epistemic-carriers",
+        "binary-projection",
+        "scope-conditional-truth",
+        "homophily",
+        "frame-translation"
+      ],
+      "audience": [
+        "ai-systems",
+        "reviewers",
+        "policy-readers"
+      ],
+      "related_docs": [
+        "meta-framework-note",
+        "institutional-inversion",
+        "documentation",
+        "middle-men"
+      ],
+      "related_scripts": [
+        "scripts/analysis/scope_check.py",
+        "scripts/audit/first_principles_audit.py",
+        "scripts/analysis/logic_ferret.py"
+      ],
+      "license": "CC0-1.0",
+      "status": "active",
+      "date": "2026-04-29",
+      "path": "Scope-collapse.md",
+      "summary": "Scope-carrier invariance principle. Anchored on Stein, Cruz, Grossi, Testori (2026), this note documents how binary belief models pre-collapse observation onto two attractors before any agent acts, and how policy derived from such models silences the only signals capable of detecting the collapse.",
+      "exists": true
     }
   ],
   "scripts": {
     "analysis": [
+      "scripts/analysis/biological_mismatch.py",
       "scripts/analysis/contamination_detector.py",
       "scripts/analysis/delusion_checker.py",
       "scripts/analysis/fieldlink.py",
@@ -287,6 +322,7 @@
       "scripts/analysis/logic_ferret.py",
       "scripts/analysis/metabolic_accounting.py",
       "scripts/analysis/resilience_stack.py",
+      "scripts/analysis/scope_check.py",
       "scripts/analysis/validation_framework.py"
     ],
     "audit": [

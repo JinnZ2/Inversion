@@ -23,6 +23,7 @@ _HANDLER_MODULES: dict[str, str] = {
     "survival": "scripts.ai_entry.survival",
     "reconstitution-protocol": "scripts.ai_entry.reconstitution_protocol",
     "meta-framework-note": "scripts.ai_entry.meta_framework_note",
+    "scope-collapse": "scripts.ai_entry.scope_collapse",
 }
 
 
