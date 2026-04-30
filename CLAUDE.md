@@ -51,6 +51,7 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── audit_core.py        # Layer 1: sensitivity, FMEA, capability (Cp/Cpk)
 │   │   ├── bias_detection.py    # Layer 2: 8 bias patterns, design choice accountability
 │   │   ├── first_principles_audit.py  # CLI combining both layers
+│   │   ├── rational_actor_audit.py    # Audit for unbounded utility/efficiency claims (5 anterior questions)
 │   │   └── study_extractor.py   # Study/white paper to module population pipeline
 │   │
 │   ├── geometric/               # Geometric systems, energy, and infrastructure
@@ -284,6 +285,16 @@ Six Sigma DMAIC validation engine. Layer 1: sensitivity analysis, boundary testi
 python3 -m scripts.audit.first_principles_audit --demo         # demo audit
 python3 -m scripts.audit.first_principles_audit --demo --json  # JSON output
 python3 -m scripts.audit.first_principles_audit --demo --markdown  # Markdown report
+```
+
+**Rational Actor Audit** (`scripts/audit/rational_actor_audit.py`):
+Schema-driven audit for papers that invoke 'rational actor', 'utility maximization', or 'efficiency' without specifying the constraint layer those concepts depend on to be physically meaningful. Codifies five anterior questions every utility/rationality claim must answer: (1) system whose utility is maximized, (2) timescale of measurement, (3) substrate constraints, (4) agent/environment boundary, (5) feedback coupling between action and substrate. Components: 14 `SURFACE_MARKERS`, 8 regex `ESCAPE_PATTERNS` ('for simplicity', 'in equilibrium', 'abstract away', ...), local `prescan_text()`, `EXTRACTION_PROMPT` for any AI model, `validate_audit_json()` schema check, `build_audit_from_extraction()` to assemble a `PaperAudit` with PASS/PARTIAL/FAIL verdict (score = unanswered fraction of anterior questions). Compatible with `study_extractor` and `first_principles_audit`.
+```
+python3 scripts/audit/rational_actor_audit.py --self-test
+python3 scripts/audit/rational_actor_audit.py --text "We assume rational agents maximizing expected utility..."
+python3 scripts/audit/rational_actor_audit.py --extraction-prompt
+python3 scripts/audit/rational_actor_audit.py --validate audit.json
+python3 scripts/audit/rational_actor_audit.py --build extraction.json --paper-id "10.1234/foo" --title "Paper Title" --json
 ```
 
 **Study Extractor** (`scripts/audit/study_extractor.py`):
