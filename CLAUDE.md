@@ -52,6 +52,7 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── bias_detection.py    # Layer 2: 8 bias patterns, design choice accountability
 │   │   ├── first_principles_audit.py  # CLI combining both layers
 │   │   ├── rational_actor_audit.py    # Audit for unbounded utility/efficiency claims (5 anterior questions)
+│   │   ├── audit_runner.py            # Batch driver: walks *.txt papers, dispatches extractor, builds report
 │   │   └── study_extractor.py   # Study/white paper to module population pipeline
 │   │
 │   ├── geometric/               # Geometric systems, energy, and infrastructure
@@ -295,6 +296,14 @@ python3 scripts/audit/rational_actor_audit.py --text "We assume rational agents 
 python3 scripts/audit/rational_actor_audit.py --extraction-prompt
 python3 scripts/audit/rational_actor_audit.py --validate audit.json
 python3 scripts/audit/rational_actor_audit.py --build extraction.json --paper-id "10.1234/foo" --title "Paper Title" --json
+```
+
+**Audit Runner** (`scripts/audit/audit_runner.py`):
+Batch driver for `rational_actor_audit`. Walks a directory of `*.txt` papers, runs `prescan_text()` on each, dispatches through a pluggable extractor, validates returned audit JSON, and writes per-paper audits to an output directory. Three extractor modes: `stub_extractor` (offline FAIL stub for pipeline smoke tests), `manual_queue_extractor` (writes `<hash>.request.txt` for human pickup, reads `<hash>.audit.json` back -- usable from a phone with no model in the loop), or any caller-supplied `ExtractorFn` (LLM client, local model, etc.). Resumable via `_run_summary.json`; skips already-audited papers and papers with no surface markers by default. The `report` subcommand aggregates per-paper JSON into a plain-text markdown report sorted by verdict (FAIL / PARTIAL / PASS), no tables, phone-readable.
+```
+python3 -m scripts.audit.audit_runner run papers/ audits/
+python3 -m scripts.audit.audit_runner run papers/ audits/ --manual queue/
+python3 -m scripts.audit.audit_runner report audits/
 ```
 
 **Study Extractor** (`scripts/audit/study_extractor.py`):
