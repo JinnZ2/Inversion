@@ -280,7 +280,7 @@ mirror = pg.judge_response(fp, "P02_purpose", "<response text>")
 ```
 
 **First Principles Audit** (`scripts/audit/first_principles_audit.py`):
-Six Sigma DMAIC validation engine. Layer 1: sensitivity analysis, boundary testing, FMEA, Monte Carlo capability (Cp/Cpk). Layer 2: 8 bias pattern detectors, design choice accountability, formulation comparison. Layer 3 (optional, when `model_description` text is provided): runs `scope_check` over the description and attaches a `scope_audit` block plus a `carrier_grade` on the summary.
+Six Sigma DMAIC validation engine. Layer 1: sensitivity analysis, boundary testing, FMEA, Monte Carlo capability (Cp/Cpk). Layer 2: 8 bias pattern detectors, design choice accountability, formulation comparison. Layer 3 (optional, when `model_description` text is provided): runs `scope_check` over the description and attaches a `scope_audit` block plus a `carrier_grade` on the summary. Layer 4 (same trigger): runs `rational_actor_audit.prescan_text()` and attaches a `rational_actor_prescan` block plus a `rational_actor_grade` (PASS / CAUTION / WARNING based on marker and escape-pattern counts). Layer 4 is prescan only; the full anterior-question scoring requires LLM extraction via `rational_actor_audit.EXTRACTION_PROMPT` and is intentionally not invoked from this synchronous call.
 ```
 python3 -m scripts.audit.first_principles_audit --demo         # demo audit
 python3 -m scripts.audit.first_principles_audit --demo --json  # JSON output
