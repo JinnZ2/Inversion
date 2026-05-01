@@ -210,21 +210,27 @@ class ValidityReweighter:
 
     def raw_citation_weight(self, claim_id: str) -> float:
         """Sum of citation counts across asserting studies, normalized to
-        the corpus maximum."""
+        the largest per-claim total in the corpus. Result lies in [0, 1].
+
+        Normalizing by the largest single-study count would let a claim
+        backed by multiple studies exceed 1.0 and break the comparison
+        against ``validity_weight``; per-claim totals keep both scores on
+        the same scale.
+        """
         if not self.studies:
             return 0.0
-        max_citations = max(
-            (s.citation_count for s in self.studies.values()),
-            default=1,
-        )
-        if max_citations == 0:
+        claim_totals = {
+            cid: sum(
+                self.studies[sid].citation_count
+                for sid in sids
+                if sid in self.studies
+            )
+            for cid, sids in self.claim_to_studies.items()
+        }
+        max_total = max(claim_totals.values(), default=0)
+        if max_total == 0:
             return 0.0
-        total = sum(
-            self.studies[sid].citation_count
-            for sid in self.claim_to_studies.get(claim_id, [])
-            if sid in self.studies
-        )
-        return round(total / max_citations, 3)
+        return round(claim_totals.get(claim_id, 0) / max_total, 3)
 
     # -- final weighting -------------------------------------------------
 
