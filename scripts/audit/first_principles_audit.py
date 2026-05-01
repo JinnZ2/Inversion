@@ -56,6 +56,7 @@ from scripts.audit.bias_detection import (
     flag_biases,
 )
 from scripts.analysis.scope_check import analyze as scope_analyze
+from scripts.audit.rational_actor_audit import prescan_text as rational_actor_prescan
 
 
 # =========================================================================
@@ -78,7 +79,8 @@ def full_audit(
     model_description: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Complete audit: Layer 1 (mechanics) + Layer 2 (bias/design choices)
-    + Layer 3 (carrier scope, if model_description text is provided)."""
+    + Layer 3 (carrier scope) + Layer 4 (rational-actor prescan), the latter
+    two only when ``model_description`` text is provided."""
     # Layer 1
     layer1 = audit_function(
         func, base_params, param_ranges,
@@ -173,6 +175,36 @@ def full_audit(
                 "PASS -- No carrier collapse signal detected."
             )
 
+        # Layer 4: rational-actor prescan. Surface markers + escape patterns
+        # only -- the full audit requires LLM extraction via
+        # rational_actor_audit.EXTRACTION_PROMPT and is intentionally not
+        # invoked here.
+        ra_prescan = rational_actor_prescan(model_description)
+        layer1["rational_actor_prescan"] = ra_prescan
+        marker_count = len(ra_prescan["surface_markers_found"])
+        escape_count = len(ra_prescan["escape_patterns_found"])
+        if marker_count == 0:
+            layer1["summary"]["rational_actor_grade"] = (
+                "PASS -- No rational-actor / utility-maximization markers."
+            )
+        elif escape_count >= 2:
+            layer1["summary"]["rational_actor_grade"] = (
+                f"WARNING -- {marker_count} marker(s) and {escape_count} "
+                "escape pattern(s) detected. Run rational_actor_audit "
+                "extraction to score the five anterior questions."
+            )
+        elif escape_count >= 1:
+            layer1["summary"]["rational_actor_grade"] = (
+                f"CAUTION -- {marker_count} marker(s) and {escape_count} "
+                "escape pattern(s). Run extraction to confirm whether the "
+                "constraint layer is specified."
+            )
+        else:
+            layer1["summary"]["rational_actor_grade"] = (
+                f"CAUTION -- {marker_count} marker(s) but no escape patterns. "
+                "Verify the constraint layer is specified."
+            )
+
     return layer1
 
 
@@ -260,11 +292,15 @@ def main() -> None:
             ),
         ]
 
-        # Deliberately binary-carrier description so the scope check fires
+        # Deliberately binary-carrier + rational-actor description so the
+        # scope check (Layer 3) and rational-actor prescan (Layer 4) both fire.
         demo_description = (
             "Agents pick one of two options. Truth is binary: A or B. "
             "Each agent holds a single bit. Pairing causes agents to flip "
-            "bits. Accuracy is the fraction of agents holding the correct bit."
+            "bits. Accuracy is the fraction of agents holding the correct "
+            "bit. We assume rational agents maximizing expected utility; "
+            "for simplicity we abstract away from biological constraints, "
+            "and in equilibrium the optimal strategy emerges naturally."
         )
 
         result = full_audit(
@@ -297,6 +333,8 @@ def main() -> None:
             print(f"  Bias Grade:        {result['summary'].get('bias_grade', 'N/A')}")
             if "carrier_grade" in s:
                 print(f"  Carrier Grade:     {s['carrier_grade']}")
+            if "rational_actor_grade" in s:
+                print(f"  Rational-Actor:    {s['rational_actor_grade']}")
             print(f"  Most Sensitive:    {s['dominant_parameter']}")
             print(f"  Documentation:     {s['documentation_ratio']:.0%}")
             print(f"  Boundary Failures: {s['boundary_failure_rate']:.0%}")
@@ -329,6 +367,21 @@ def main() -> None:
                     )
                 )
                 print(f"    {sa['verdict']}")
+
+            ra = result.get("rational_actor_prescan")
+            if ra:
+                print(
+                    "\n  Rational-Actor Prescan: markers={} escapes={} "
+                    "warrants_full_audit={}".format(
+                        len(ra["surface_markers_found"]),
+                        len(ra["escape_patterns_found"]),
+                        ra["warrants_full_audit"],
+                    )
+                )
+                if ra["surface_markers_found"]:
+                    print(f"    markers: {ra['surface_markers_found']}")
+                if ra["escape_patterns_found"]:
+                    print(f"    escapes: {ra['escape_patterns_found']}")
 
             print()
     else:

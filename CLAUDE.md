@@ -51,6 +51,11 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── audit_core.py        # Layer 1: sensitivity, FMEA, capability (Cp/Cpk)
 │   │   ├── bias_detection.py    # Layer 2: 8 bias patterns, design choice accountability
 │   │   ├── first_principles_audit.py  # CLI combining both layers
+│   │   ├── rational_actor_audit.py    # Audit for unbounded utility/efficiency claims (5 anterior questions)
+│   │   ├── audit_runner.py            # Batch driver: walks *.txt papers, dispatches extractor, builds report
+│   │   ├── substrate_aware_audit.py   # 4-layer audit: observer / logic / rational-actor / consciousness; v2 distributed mode
+│   │   ├── premise_cross_domain_audit.py  # Premise tracing + repercussion cascades + fragility ranking
+│   │   ├── validity_weighted_reweighting.py  # Reweight claims by premise validity vs citation frequency
 │   │   └── study_extractor.py   # Study/white paper to module population pipeline
 │   │
 │   ├── geometric/               # Geometric systems, energy, and infrastructure
@@ -279,11 +284,60 @@ mirror = pg.judge_response(fp, "P02_purpose", "<response text>")
 ```
 
 **First Principles Audit** (`scripts/audit/first_principles_audit.py`):
-Six Sigma DMAIC validation engine. Layer 1: sensitivity analysis, boundary testing, FMEA, Monte Carlo capability (Cp/Cpk). Layer 2: 8 bias pattern detectors, design choice accountability, formulation comparison. Layer 3 (optional, when `model_description` text is provided): runs `scope_check` over the description and attaches a `scope_audit` block plus a `carrier_grade` on the summary.
+Six Sigma DMAIC validation engine. Layer 1: sensitivity analysis, boundary testing, FMEA, Monte Carlo capability (Cp/Cpk). Layer 2: 8 bias pattern detectors, design choice accountability, formulation comparison. Layer 3 (optional, when `model_description` text is provided): runs `scope_check` over the description and attaches a `scope_audit` block plus a `carrier_grade` on the summary. Layer 4 (same trigger): runs `rational_actor_audit.prescan_text()` and attaches a `rational_actor_prescan` block plus a `rational_actor_grade` (PASS / CAUTION / WARNING based on marker and escape-pattern counts). Layer 4 is prescan only; the full anterior-question scoring requires LLM extraction via `rational_actor_audit.EXTRACTION_PROMPT` and is intentionally not invoked from this synchronous call.
 ```
 python3 -m scripts.audit.first_principles_audit --demo         # demo audit
 python3 -m scripts.audit.first_principles_audit --demo --json  # JSON output
 python3 -m scripts.audit.first_principles_audit --demo --markdown  # Markdown report
+```
+
+**Rational Actor Audit** (`scripts/audit/rational_actor_audit.py`):
+Schema-driven audit for papers that invoke 'rational actor', 'utility maximization', or 'efficiency' without specifying the constraint layer those concepts depend on to be physically meaningful. Codifies five anterior questions every utility/rationality claim must answer: (1) system whose utility is maximized, (2) timescale of measurement, (3) substrate constraints, (4) agent/environment boundary, (5) feedback coupling between action and substrate. Components: 14 `SURFACE_MARKERS`, 8 regex `ESCAPE_PATTERNS` ('for simplicity', 'in equilibrium', 'abstract away', ...), local `prescan_text()`, `EXTRACTION_PROMPT` for any AI model, `validate_audit_json()` schema check, `build_audit_from_extraction()` to assemble a `PaperAudit` with PASS/PARTIAL/FAIL verdict (score = unanswered fraction of anterior questions). Compatible with `study_extractor` and `first_principles_audit`.
+```
+python3 scripts/audit/rational_actor_audit.py --self-test
+python3 scripts/audit/rational_actor_audit.py --text "We assume rational agents maximizing expected utility..."
+python3 scripts/audit/rational_actor_audit.py --extraction-prompt
+python3 scripts/audit/rational_actor_audit.py --validate audit.json
+python3 scripts/audit/rational_actor_audit.py --build extraction.json --paper-id "10.1234/foo" --title "Paper Title" --json
+```
+
+**Audit Runner** (`scripts/audit/audit_runner.py`):
+Batch driver for `rational_actor_audit`. Walks a directory of `*.txt` papers, runs `prescan_text()` on each, dispatches through a pluggable extractor, validates returned audit JSON, and writes per-paper audits to an output directory. Three extractor modes: `stub_extractor` (offline FAIL stub for pipeline smoke tests), `manual_queue_extractor` (writes `<hash>.request.txt` for human pickup, reads `<hash>.audit.json` back -- usable from a phone with no model in the loop), or any caller-supplied `ExtractorFn` (LLM client, local model, etc.). Resumable via `_run_summary.json`; skips already-audited papers and papers with no surface markers by default. The `report` subcommand aggregates per-paper JSON into a plain-text markdown report sorted by verdict (FAIL / PARTIAL / PASS), no tables, phone-readable.
+```
+python3 -m scripts.audit.audit_runner run papers/ audits/
+python3 -m scripts.audit.audit_runner run papers/ audits/ --manual queue/
+python3 -m scripts.audit.audit_runner report audits/
+```
+
+**Substrate-Aware Audit (v2)** (`scripts/audit/substrate_aware_audit.py`):
+Topology-agnostic substrate-awareness audit framework. Same five operations across all four cognitive layers, two aggregation modes. **Individual mode** (`audit_node`) audits a single node across observer / logic / rational_actor / consciousness; per-layer verdicts DEMONSTRABLE / PARTIAL / OPAQUE based on weighted failure score. **Distributed mode** (`audit_institution`) audits a graph of nodes plus the coupling between them via five collective tests (`signal_propagation`, `feedback_latency`, `compartment_visibility`, `collective_drift_detection`, `responsibility_localization`). Three v2 design choices: (1) asymmetric cascade threshold (0.40 weighted denial fires `OPAQUE_CASCADE`, not simple majority -- false-negative is catastrophic, false-positive is recoverable); (2) layer criticality weighting (rational_actor 0.35, observer 0.30, consciousness 0.20, logic 0.15); (3) the `INSTITUTIONAL_DENIAL` verdict, which fires when individual node health > 0.8 but the collective verdict is OPAQUE -- competent personnel in a substrate-denying coupling structure, the diagnostic v1 could not produce. Six reference audits illustrate the verdict bands: aware / denying / honest LLM (individual), healthy / competent-personnel-failed / denying (distributed).
+```
+python3 scripts/audit/substrate_aware_audit.py --self-test
+python3 scripts/audit/substrate_aware_audit.py --diagnostic
+python3 scripts/audit/substrate_aware_audit.py --layer rational_actor
+python3 scripts/audit/substrate_aware_audit.py --reference denying --json
+python3 scripts/audit/substrate_aware_audit.py --institution failed
+python3 scripts/audit/substrate_aware_audit.py --validate node_audit.json
+python3 scripts/audit/substrate_aware_audit.py --validate-distributed inst_audit.json
+```
+
+**Premise Cross-Domain Audit** (`scripts/audit/premise_cross_domain_audit.py`):
+Cross-domain premise tracing and repercussion analysis. Models the world as a `PremiseAuditEngine` of `Premise` (with `confidence` and `evidence_strength`) and `DomainClaim` (with `depends_on` / `supports` / `contradicts`) nodes. Detects: shared premises across domains, claim contradictions with backward root-premise trace (classified as `self_inflicted` / `framework_conflict` / `asymmetric`), forward propagation cascades from a failed premise (severity weighted by `Premise.fragility() = confidence * (1 - evidence_strength)` -- high belief + low evidence = the danger zone), circular dependency chains, and per-domain hidden-assumption density. The `epistemic_fragility_report()` ranks cross-domain premises by `risk_score = blast_radius * len(domains) * (1 + fragility)`. The fragility metric is the load-bearing signal: high-confidence + low-evidence premises propagate widest before their grounding is questioned.
+```
+python3 scripts/audit/premise_cross_domain_audit.py --demo
+python3 scripts/audit/premise_cross_domain_audit.py engine.json --report
+python3 scripts/audit/premise_cross_domain_audit.py --propagate P1
+python3 scripts/audit/premise_cross_domain_audit.py --roots C2 --json
+python3 scripts/audit/premise_cross_domain_audit.py --export > engine.json
+```
+
+**Validity-Weighted Reweighting** (`scripts/audit/validity_weighted_reweighting.py`):
+Reweights claims by premise validity rather than citation frequency. Sits on top of `PremiseAuditEngine` as the corpus model and adds `Study` (citation-bearing wrapper with `population_scope` and `methodology_controls`) and `PopulationContext` (the population the question is about, with `required_controls`). Component scores: `premise_validity_score` (mean evidence_strength of root premises minus mean fragility), `population_fit_score` (study scope/controls overlap with the target population), `contradiction_penalty` (differential when a contradicting claim has higher validity), `raw_citation_weight` (the frequency-based foil). Final `validity_weight = premise_validity * population_fit * (1 - penalty)`. The `divergence_report()` surfaces the gap between citation weight and validity weight: `overcited_undergrounded` (loud but fragile -- the danger zone for frequency-weighted retrieval) vs `undercited_grounded` (quiet but solid). Demo shows C2 ('aggressive signaling increases attractiveness') at citation_freq=1.625 but validity_weight=0.0, while C4 ('chronic stress reduces fertility') at citation_freq=0.15 has validity_weight=0.574.
+```
+python3 scripts/audit/validity_weighted_reweighting.py --demo
+python3 scripts/audit/validity_weighted_reweighting.py --rank --json
+python3 scripts/audit/validity_weighted_reweighting.py --divergence --threshold 0.3
+python3 scripts/audit/validity_weighted_reweighting.py --no-context --rank
 ```
 
 **Study Extractor** (`scripts/audit/study_extractor.py`):
