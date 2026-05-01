@@ -307,14 +307,16 @@ python3 -m scripts.audit.audit_runner run papers/ audits/ --manual queue/
 python3 -m scripts.audit.audit_runner report audits/
 ```
 
-**Substrate-Aware Audit** (`scripts/audit/substrate_aware_audit.py`):
-Four-layer audit framework grounded in first principles. Layer 1 `observer` (5 tests): does the observer know their own state -- sleep debt, fatigue, hormones, calibration history, instrument humility? Layer 2 `logic` (6 tests): does the logical chain hold when observer state is plugged in -- premise visibility, definition stability, substrate robustness, circularity, falsifiability, motive? Layer 3 `rational_actor` (6 tests): can the actor articulate how their biology shapes decisions -- substrate acknowledgment, biology in the decision loop, emotion-as-data, correction protocol, incentive visibility, category-appeal check? Layer 4 `consciousness` (5 tests, substrate-neutral, non-anthropomorphic): state detection, substrate acknowledgment, feedback integration, drift detection, transparency. Per-layer verdicts: DEMONSTRABLE / PARTIAL / OPAQUE based on weighted failure score. Cross-layer substrate-acknowledgment is the load-bearing signal: when fewer than two layers acknowledge substrate, the integrated verdict cascades to OPAQUE_CASCADE regardless of articulacy on individual non-substrate tests. Three reference audits illustrate the verdict bands (substrate-aware / substrate-denying / honest LLM).
+**Substrate-Aware Audit (v2)** (`scripts/audit/substrate_aware_audit.py`):
+Topology-agnostic substrate-awareness audit framework. Same five operations across all four cognitive layers, two aggregation modes. **Individual mode** (`audit_node`) audits a single node across observer / logic / rational_actor / consciousness; per-layer verdicts DEMONSTRABLE / PARTIAL / OPAQUE based on weighted failure score. **Distributed mode** (`audit_institution`) audits a graph of nodes plus the coupling between them via five collective tests (`signal_propagation`, `feedback_latency`, `compartment_visibility`, `collective_drift_detection`, `responsibility_localization`). Three v2 design choices: (1) asymmetric cascade threshold (0.40 weighted denial fires `OPAQUE_CASCADE`, not simple majority -- false-negative is catastrophic, false-positive is recoverable); (2) layer criticality weighting (rational_actor 0.35, observer 0.30, consciousness 0.20, logic 0.15); (3) the `INSTITUTIONAL_DENIAL` verdict, which fires when individual node health > 0.8 but the collective verdict is OPAQUE -- competent personnel in a substrate-denying coupling structure, the diagnostic v1 could not produce. Six reference audits illustrate the verdict bands: aware / denying / honest LLM (individual), healthy / competent-personnel-failed / denying (distributed).
 ```
 python3 scripts/audit/substrate_aware_audit.py --self-test
 python3 scripts/audit/substrate_aware_audit.py --diagnostic
-python3 scripts/audit/substrate_aware_audit.py --layer observer
+python3 scripts/audit/substrate_aware_audit.py --layer rational_actor
 python3 scripts/audit/substrate_aware_audit.py --reference denying --json
-python3 scripts/audit/substrate_aware_audit.py --validate audit.json
+python3 scripts/audit/substrate_aware_audit.py --institution failed
+python3 scripts/audit/substrate_aware_audit.py --validate node_audit.json
+python3 scripts/audit/substrate_aware_audit.py --validate-distributed inst_audit.json
 ```
 
 **Study Extractor** (`scripts/audit/study_extractor.py`):
