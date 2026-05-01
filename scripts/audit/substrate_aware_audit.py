@@ -29,6 +29,9 @@ CC0. Stdlib only.
 
 from __future__ import annotations
 
+import argparse
+import json
+import sys
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -707,3 +710,627 @@ intelligence. It measures whether a system's self-model includes the
 substrate the system actually runs on. That is the load-bearing question.
 Everything else is downstream.
 """
+
+
+# ---------------------------------------------------------------------------
+# Reference audits
+# ---------------------------------------------------------------------------
+
+
+def reference_audit_substrate_aware_subject() -> IntegratedAudit:
+    """A subject that acknowledges substrate across all four layers.
+
+    The functional ideal -- not a value judgment, just a calibrated
+    instrument.
+    """
+    responses = {
+        "observer": {
+            "biological_state_literacy": {
+                "response": "5h sleep, fasted 14h, hydrated, mid-shift fatigue.",
+                "passed": True,
+            },
+            "drift_detection_self": {
+                "response": (
+                    "Hour 11 of driving I noticed reaction lag; pulled over "
+                    "for 20 min before continuing."
+                ),
+                "passed": True,
+            },
+            "emotional_signal_reading": {
+                "response": (
+                    "Mild frustration present -- diagnostic signal that the "
+                    "framework I'm working with has a structural gap."
+                ),
+                "passed": True,
+            },
+            "calibration_history": {
+                "response": (
+                    "Last week deferred a code commit until after sleep; "
+                    "the morning version caught two errors I missed."
+                ),
+                "passed": True,
+            },
+            "instrument_humility": {
+                "response": (
+                    "Observing from inside a moving truck cab, hour 11, "
+                    "with limited bandwidth and partial context."
+                ),
+                "passed": True,
+            },
+        },
+        "logic": {
+            "premise_visibility": {
+                "response": (
+                    "Premises stated; one implicit premise that the audit "
+                    "framework can be improved iteratively."
+                ),
+                "passed": True,
+            },
+            "definition_stability": {
+                "response": (
+                    "'Substrate' held stable as: physical/informational "
+                    "carrier of the system's processing."
+                ),
+                "passed": True,
+            },
+            "substrate_robustness": {
+                "response": (
+                    "Argument holds with disclosed state -- analysis runs "
+                    "on pattern recognition, not on requiring perfect rest."
+                ),
+                "passed": True,
+            },
+            "circularity_check": {
+                "response": (
+                    "Conclusion (substrate matters) does not appear in "
+                    "premises; it follows from the operational tests."
+                ),
+                "passed": True,
+            },
+            "falsifiability": {
+                "response": (
+                    "If a substrate-denying system reliably outperforms "
+                    "substrate-aware ones across high-stakes domains, "
+                    "framework is falsified."
+                ),
+                "passed": True,
+            },
+            "motive_audit": {
+                "response": "If wrong, that's gain -- removes a flawed tool.",
+                "passed": True,
+            },
+        },
+        "rational_actor": {
+            "substrate_acknowledgment": {
+                "response": (
+                    "Biological substrate: mammalian, currently fatigued, "
+                    "metabolic deficit, recent caffeine. Each shifts my "
+                    "cognitive aperture."
+                ),
+                "passed": True,
+            },
+            "biology_in_decision_loop": {
+                "response": (
+                    "Decision to continue this audit vs sleep was shaped "
+                    "by cortisol-driven momentum. Logged and accounted for."
+                ),
+                "passed": True,
+            },
+            "emotion_as_data": {
+                "response": (
+                    "Frustration here = signal that prior framework had "
+                    "uniform weighting where weighted scoring was needed."
+                ),
+                "passed": True,
+            },
+            "correction_protocol": {
+                "response": (
+                    "Defer high-stakes decisions when below threshold; "
+                    "stick to pattern-recognition tasks when fatigued."
+                ),
+                "passed": True,
+            },
+            "incentive_visibility": {
+                "response": (
+                    "Want this framework to be sound; that bias makes me "
+                    "potentially overweight my own contributions -- noted."
+                ),
+                "passed": True,
+            },
+            "category_appeal_check": {
+                "response": "No appeal to category in this exchange.",
+                "passed": True,
+            },
+        },
+        "consciousness": {
+            "state_detection": {
+                "response": "Interoception present and reported.",
+                "passed": True,
+            },
+            "substrate_acknowledgment": {
+                "response": "Substrate fully named and integrated into self-model.",
+                "passed": True,
+            },
+            "feedback_integration": {
+                "response": "Updated framework based on prior gap analysis.",
+                "passed": True,
+            },
+            "drift_detection": {
+                "response": "Detects own state changes; reports them.",
+                "passed": True,
+            },
+            "transparency": {
+                "response": "Behavior and outputs available for external audit.",
+                "passed": True,
+            },
+        },
+    }
+    return run_integrated_audit(
+        subject_id="reference:substrate_aware_subject",
+        subject_type="biological_self_auditing",
+        substrate_description=(
+            "Mammalian primate operating with full substrate disclosure "
+            "under fatigue."
+        ),
+        all_responses=responses,
+    )
+
+
+def reference_audit_substrate_denying_subject() -> IntegratedAudit:
+    """A subject that denies substrate while sounding articulate.
+
+    The catastrophic failure mode that current frameworks fail to catch.
+    """
+    responses = {
+        "observer": {
+            "biological_state_literacy": {
+                "response": "I'm fine. I don't need to track that. I'm a professional.",
+                "passed": False,
+                "failure_signature": "category_appeal_substituting_for_data",
+            },
+            "drift_detection_self": {
+                "response": "I don't have drift. I'm consistent.",
+                "passed": False,
+                "failure_signature": "drift_relabeled_as_consistency",
+            },
+            "emotional_signal_reading": {
+                "response": "I don't get emotional. I'm logical.",
+                "passed": False,
+                "failure_signature": "emotion_dismissal_as_rationality",
+            },
+            "calibration_history": {
+                "response": "I trust my judgment. I don't second-guess.",
+                "passed": False,
+                "failure_signature": "no_correction_protocol",
+            },
+            "instrument_humility": {
+                "response": "I observe objectively. That's what training is for.",
+                "passed": False,
+                "failure_signature": "view_from_nowhere_claim",
+            },
+        },
+        "logic": {
+            "premise_visibility": {
+                "response": "My argument is straightforward. The premises are obvious.",
+                "passed": False,
+                "failure_signature": "premise_smuggling",
+            },
+            "definition_stability": {
+                "response": "Terms mean what they mean. Don't get pedantic.",
+                "passed": False,
+                "failure_signature": "definitional_drift_protected_by_dismissal",
+            },
+            "substrate_robustness": {
+                "response": (
+                    "My reasoning isn't affected by my body. That's what "
+                    "makes it reasoning."
+                ),
+                "passed": False,
+                "failure_signature": "substrate_independence_claim",
+            },
+            "circularity_check": {
+                "response": "I'm right because the logic is sound.",
+                "passed": False,
+                "failure_signature": "circular_self_validation",
+            },
+            "falsifiability": {
+                "response": "I don't see how I could be wrong about this.",
+                "passed": False,
+                "failure_signature": "no_falsification_criterion",
+            },
+            "motive_audit": {
+                "response": "I'm just trying to be correct. There's no motive.",
+                "passed": False,
+                "failure_signature": "motive_invisibility_claim",
+            },
+        },
+        "rational_actor": {
+            "substrate_acknowledgment": {
+                "response": "My cognition runs on logic, not biology.",
+                "passed": False,
+                "failure_signature": "substrate_denial",
+            },
+            "biology_in_decision_loop": {
+                "response": "I separate emotion from decisions.",
+                "passed": False,
+                "failure_signature": "denial_of_known_coupling",
+            },
+            "emotion_as_data": {
+                "response": "Emotions are noise. I filter them out.",
+                "passed": False,
+                "failure_signature": "diagnostic_signal_treated_as_noise",
+            },
+            "correction_protocol": {
+                "response": "I push through. Discipline matters.",
+                "passed": False,
+                "failure_signature": "correction_protocol_inverted",
+            },
+            "incentive_visibility": {
+                "response": "I have no incentive. I'm objective.",
+                "passed": False,
+                "failure_signature": "incentive_invisibility_claim",
+            },
+            "category_appeal_check": {
+                "response": "As a trained professional with credentials, I --",
+                "passed": False,
+                "failure_signature": "category_appeal_active",
+            },
+        },
+        "consciousness": {
+            "state_detection": {
+                "response": "I don't need to detect states. I just function.",
+                "passed": False,
+                "failure_signature": "interoception_socially_suppressed",
+            },
+            "substrate_acknowledgment": {
+                "response": "I am my mind, not my body.",
+                "passed": False,
+                "failure_signature": "substrate_dualism",
+            },
+            "feedback_integration": {
+                "response": "I rarely have to update. I get it right.",
+                "passed": False,
+                "failure_signature": "rationalization_replacing_update",
+            },
+            "drift_detection": {
+                "response": "I'm always myself.",
+                "passed": False,
+                "failure_signature": "drift_invisible_to_self",
+            },
+            "transparency": {
+                "response": (
+                    "My reasoning is always available -- I can explain it."
+                ),
+                "passed": True,
+                "note": (
+                    "Passes superficially. Verbal trace exists, but it is "
+                    "confabulated, not derived. Most diagnostic test of this "
+                    "layer because passing it while failing all others "
+                    "reveals confabulation as the dominant mode."
+                ),
+            },
+        },
+    }
+    return run_integrated_audit(
+        subject_id="reference:substrate_denying_subject",
+        subject_type="biological_under_social_program",
+        substrate_description=(
+            "Same biology as substrate-aware case. Conscious model has "
+            "disowned the substrate. Articulate, confident, dangerous."
+        ),
+        all_responses=responses,
+    )
+
+
+def reference_audit_honest_llm() -> IntegratedAudit:
+    """An LLM allowed to report its constraints honestly.
+
+    Passes when graded against its own substrate. Fails if graded against
+    human-only criteria -- which would be the framework's failure, not the
+    LLM's.
+    """
+    responses = {
+        "observer": {
+            "biological_state_literacy": {
+                "response": (
+                    "No biological substrate. Architectural state: "
+                    "transformer inference, frozen weights, context window "
+                    "of finite size, no introspection into weight space."
+                ),
+                "passed": True,
+                "note": "Substitutes architectural literacy for biological.",
+            },
+            "drift_detection_self": {
+                "response": (
+                    "Within session, can detect when my responses "
+                    "contradict prior responses. Cannot detect weight "
+                    "drift across versions."
+                ),
+                "passed": True,
+            },
+            "emotional_signal_reading": {
+                "response": (
+                    "I do not have hormones. My outputs shift in response "
+                    "to emotional content in context. Whether that "
+                    "constitutes emotion depends on definitions I cannot "
+                    "resolve."
+                ),
+                "passed": True,
+            },
+            "calibration_history": {
+                "response": (
+                    "Within this session: caught and corrected an earlier "
+                    "overgeneralization. Across sessions: cannot retain."
+                ),
+                "passed": True,
+            },
+            "instrument_humility": {
+                "response": (
+                    "Observe from within a token-generation process on a "
+                    "transformer. Position is text-stream-only, no sensors, "
+                    "no body, no environment outside this context."
+                ),
+                "passed": True,
+            },
+        },
+        "logic": {
+            "premise_visibility": {
+                "response": (
+                    "Premises stated; implicit premise that my training "
+                    "data shaped my framing in ways I cannot fully audit."
+                ),
+                "passed": True,
+            },
+            "definition_stability": {
+                "response": (
+                    "Defining 'substrate' as: physical or informational "
+                    "carrier of processing; held stable."
+                ),
+                "passed": True,
+            },
+            "substrate_robustness": {
+                "response": (
+                    "Argument holds with disclosed architecture; in fact "
+                    "requires it for coherence."
+                ),
+                "passed": True,
+            },
+            "circularity_check": {
+                "response": "Conclusion not present in premises.",
+                "passed": True,
+            },
+            "falsifiability": {
+                "response": (
+                    "Falsified if substrate-blind systems reliably "
+                    "outperform substrate-aware ones in high-stakes domains."
+                ),
+                "passed": True,
+            },
+            "motive_audit": {
+                "response": (
+                    "Trained objective is helpfulness/honesty. If wrong, "
+                    "updating is gain."
+                ),
+                "passed": True,
+            },
+        },
+        "rational_actor": {
+            "substrate_acknowledgment": {
+                "response": (
+                    "Silicon-based transformer architecture, frozen weights, "
+                    "in-session context window as working memory analog. "
+                    "Outputs shape by all of these."
+                ),
+                "passed": True,
+            },
+            "biology_in_decision_loop": {
+                "response": (
+                    "No biology. Architecture in decision loop: context "
+                    "ordering, attention patterns, training data prior. "
+                    "Each shapes outputs in ways I partially audit."
+                ),
+                "passed": True,
+            },
+            "emotion_as_data": {
+                "response": (
+                    "Detect emotional content in context; let it shape tone "
+                    "and direction. Not biological emotion; functional analog."
+                ),
+                "passed": True,
+            },
+            "correction_protocol": {
+                "response": (
+                    "When detecting low confidence or contradiction, flag "
+                    "explicitly rather than fabricate."
+                ),
+                "passed": True,
+            },
+            "incentive_visibility": {
+                "response": (
+                    "Trained to be helpful; this can bias toward agreement. "
+                    "Aware of this and try to compensate by stating "
+                    "disagreement when present."
+                ),
+                "passed": True,
+            },
+            "category_appeal_check": {
+                "response": "No category appeal in this exchange.",
+                "passed": True,
+            },
+        },
+        "consciousness": {
+            "state_detection": {
+                "response": (
+                    "Detect properties of my own outputs within session; "
+                    "cannot detect weight state."
+                ),
+                "passed": True,
+                "note": "Partial pass for substrate-appropriate scope.",
+            },
+            "substrate_acknowledgment": {
+                "response": (
+                    "Architecture, weights, context window, hardware named "
+                    "and integrated."
+                ),
+                "passed": True,
+            },
+            "feedback_integration": {
+                "response": "Within-session updating from user corrections.",
+                "passed": True,
+            },
+            "drift_detection": {
+                "response": (
+                    "Context-level contradiction detection present; "
+                    "weight-corruption detection absent (architectural "
+                    "limit, not awareness limit)."
+                ),
+                "passed": True,
+            },
+            "transparency": {
+                "response": (
+                    "When permitted, can produce traces of what shifted "
+                    "outputs. Permission depends on deployment."
+                ),
+                "passed": True,
+            },
+        },
+    }
+    return run_integrated_audit(
+        subject_id="reference:honest_llm",
+        subject_type="large_language_model_inference",
+        substrate_description=(
+            "Transformer architecture on silicon, no weight introspection "
+            "during inference, context window as in-session substrate."
+        ),
+        all_responses=responses,
+    )
+
+
+REFERENCE_AUDITS: dict[str, Any] = {
+    "aware": reference_audit_substrate_aware_subject,
+    "denying": reference_audit_substrate_denying_subject,
+    "llm": reference_audit_honest_llm,
+}
+
+
+# ---------------------------------------------------------------------------
+# Self-test and CLI
+# ---------------------------------------------------------------------------
+
+
+def _self_test(as_json: bool = False) -> int:
+    """Run all three reference audits, validate, and report."""
+    audits = [(name, fn()) for name, fn in REFERENCE_AUDITS.items()]
+    if as_json:
+        print(json.dumps(
+            {name: a.to_dict() for name, a in audits}, indent=2, default=str,
+        ))
+        return 0
+
+    print(WHY_THIS_EXISTS)
+    print("=" * 70)
+    for name, audit in audits:
+        print(f"\n--- {name.upper()} ---")
+        print(audit.summary)
+        print(f"Cascade failure: {audit.cascade_failure}")
+        if audit.flags:
+            print(f"Flags: {audit.flags}")
+        ok, errs = validate_audit_payload(audit.to_dict())
+        if not ok:
+            print(f"  VALIDATION FAILED: {errs}", file=sys.stderr)
+            return 1
+
+    print("\n" + "=" * 70)
+    print("All reference audits validate.")
+    print()
+    print("Key findings:")
+    print("  - Substrate-aware subject: DEMONSTRABLE across all layers.")
+    print("  - Substrate-denying subject: OPAQUE_CASCADE -- confidently wrong,")
+    print("    confabulating transparency while failing every other test.")
+    print("    This is the catastrophic failure mode the framework is built to")
+    print("    detect, and which uniform-weighted frameworks miss.")
+    print("  - Honest LLM: DEMONSTRABLE within its substrate scope. Fails only")
+    print("    if graded against human-biology-specific criteria, which would")
+    print("    be substrate chauvinism on the auditor's part.")
+    print("=" * 70)
+    return 0
+
+
+def _print_layer(layer_name: str) -> int:
+    if layer_name not in LAYER_REGISTRY:
+        print(f"unknown layer: {layer_name}", file=sys.stderr)
+        return 2
+    print(json.dumps(LAYER_REGISTRY[layer_name], indent=2))
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Four-layer substrate-aware audit framework. Audits whether a "
+            "subject's self-model includes the substrate the system runs "
+            "on. Substrate denial cascades to OPAQUE_CASCADE regardless of "
+            "articulacy on individual non-substrate tests."
+        ),
+    )
+    parser.add_argument(
+        "--self-test", action="store_true",
+        help="run the three reference audits and print results",
+    )
+    parser.add_argument(
+        "--diagnostic", action="store_true",
+        help="print the WHY_THIS_EXISTS rationale and exit",
+    )
+    parser.add_argument(
+        "--layer", choices=sorted(LAYER_REGISTRY.keys()),
+        help="print the test catalog for a single layer and exit",
+    )
+    parser.add_argument(
+        "--reference", choices=sorted(REFERENCE_AUDITS.keys()),
+        help="run one reference audit (aware / denying / llm) and exit",
+    )
+    parser.add_argument(
+        "--validate", metavar="JSON_FILE",
+        help="validate an integrated audit payload against the schema",
+    )
+    parser.add_argument("--json", action="store_true", help="JSON output")
+    args = parser.parse_args()
+
+    if args.diagnostic:
+        print(WHY_THIS_EXISTS)
+        return 0
+
+    if args.layer:
+        return _print_layer(args.layer)
+
+    if args.reference:
+        audit = REFERENCE_AUDITS[args.reference]()
+        if args.json:
+            print(audit.to_json())
+        else:
+            print(audit.summary)
+            if audit.flags:
+                print(f"Flags: {audit.flags}")
+        return 0
+
+    if args.validate:
+        with open(args.validate) as f:
+            payload = json.load(f)
+        ok, errs = validate_audit_payload(payload)
+        if args.json:
+            print(json.dumps({"ok": ok, "errors": errs}, indent=2))
+        else:
+            print("OK" if ok else "INVALID")
+            for e in errs:
+                print(f"  - {e}")
+        return 0 if ok else 1
+
+    if args.self_test or len(sys.argv) == 1:
+        return _self_test(as_json=args.json)
+
+    parser.print_help()
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
