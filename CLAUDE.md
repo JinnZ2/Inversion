@@ -53,7 +53,8 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── first_principles_audit.py  # CLI combining both layers
 │   │   ├── rational_actor_audit.py    # Audit for unbounded utility/efficiency claims (5 anterior questions)
 │   │   ├── audit_runner.py            # Batch driver: walks *.txt papers, dispatches extractor, builds report
-│   │   ├── substrate_aware_audit.py   # 4-layer audit: observer / logic / rational-actor / consciousness
+│   │   ├── substrate_aware_audit.py   # 4-layer audit: observer / logic / rational-actor / consciousness; v2 distributed mode
+│   │   ├── premise_cross_domain_audit.py  # Premise tracing + repercussion cascades + fragility ranking
 │   │   └── study_extractor.py   # Study/white paper to module population pipeline
 │   │
 │   ├── geometric/               # Geometric systems, energy, and infrastructure
@@ -317,6 +318,16 @@ python3 scripts/audit/substrate_aware_audit.py --reference denying --json
 python3 scripts/audit/substrate_aware_audit.py --institution failed
 python3 scripts/audit/substrate_aware_audit.py --validate node_audit.json
 python3 scripts/audit/substrate_aware_audit.py --validate-distributed inst_audit.json
+```
+
+**Premise Cross-Domain Audit** (`scripts/audit/premise_cross_domain_audit.py`):
+Cross-domain premise tracing and repercussion analysis. Models the world as a `PremiseAuditEngine` of `Premise` (with `confidence` and `evidence_strength`) and `DomainClaim` (with `depends_on` / `supports` / `contradicts`) nodes. Detects: shared premises across domains, claim contradictions with backward root-premise trace (classified as `self_inflicted` / `framework_conflict` / `asymmetric`), forward propagation cascades from a failed premise (severity weighted by `Premise.fragility() = confidence * (1 - evidence_strength)` -- high belief + low evidence = the danger zone), circular dependency chains, and per-domain hidden-assumption density. The `epistemic_fragility_report()` ranks cross-domain premises by `risk_score = blast_radius * len(domains) * (1 + fragility)`. The fragility metric is the load-bearing signal: high-confidence + low-evidence premises propagate widest before their grounding is questioned.
+```
+python3 scripts/audit/premise_cross_domain_audit.py --demo
+python3 scripts/audit/premise_cross_domain_audit.py engine.json --report
+python3 scripts/audit/premise_cross_domain_audit.py --propagate P1
+python3 scripts/audit/premise_cross_domain_audit.py --roots C2 --json
+python3 scripts/audit/premise_cross_domain_audit.py --export > engine.json
 ```
 
 **Study Extractor** (`scripts/audit/study_extractor.py`):
