@@ -55,6 +55,7 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── audit_runner.py            # Batch driver: walks *.txt papers, dispatches extractor, builds report
 │   │   ├── substrate_aware_audit.py   # 4-layer audit: observer / logic / rational-actor / consciousness; v2 distributed mode
 │   │   ├── premise_cross_domain_audit.py  # Premise tracing + repercussion cascades + fragility ranking
+│   │   ├── validity_weighted_reweighting.py  # Reweight claims by premise validity vs citation frequency
 │   │   └── study_extractor.py   # Study/white paper to module population pipeline
 │   │
 │   ├── geometric/               # Geometric systems, energy, and infrastructure
@@ -328,6 +329,15 @@ python3 scripts/audit/premise_cross_domain_audit.py engine.json --report
 python3 scripts/audit/premise_cross_domain_audit.py --propagate P1
 python3 scripts/audit/premise_cross_domain_audit.py --roots C2 --json
 python3 scripts/audit/premise_cross_domain_audit.py --export > engine.json
+```
+
+**Validity-Weighted Reweighting** (`scripts/audit/validity_weighted_reweighting.py`):
+Reweights claims by premise validity rather than citation frequency. Sits on top of `PremiseAuditEngine` as the corpus model and adds `Study` (citation-bearing wrapper with `population_scope` and `methodology_controls`) and `PopulationContext` (the population the question is about, with `required_controls`). Component scores: `premise_validity_score` (mean evidence_strength of root premises minus mean fragility), `population_fit_score` (study scope/controls overlap with the target population), `contradiction_penalty` (differential when a contradicting claim has higher validity), `raw_citation_weight` (the frequency-based foil). Final `validity_weight = premise_validity * population_fit * (1 - penalty)`. The `divergence_report()` surfaces the gap between citation weight and validity weight: `overcited_undergrounded` (loud but fragile -- the danger zone for frequency-weighted retrieval) vs `undercited_grounded` (quiet but solid). Demo shows C2 ('aggressive signaling increases attractiveness') at citation_freq=1.625 but validity_weight=0.0, while C4 ('chronic stress reduces fertility') at citation_freq=0.15 has validity_weight=0.574.
+```
+python3 scripts/audit/validity_weighted_reweighting.py --demo
+python3 scripts/audit/validity_weighted_reweighting.py --rank --json
+python3 scripts/audit/validity_weighted_reweighting.py --divergence --threshold 0.3
+python3 scripts/audit/validity_weighted_reweighting.py --no-context --rank
 ```
 
 **Study Extractor** (`scripts/audit/study_extractor.py`):
