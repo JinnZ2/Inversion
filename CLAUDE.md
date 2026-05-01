@@ -53,6 +53,7 @@ Markdown documents live in the root directory. Python scripts are organized into
 │   │   ├── first_principles_audit.py  # CLI combining both layers
 │   │   ├── rational_actor_audit.py    # Audit for unbounded utility/efficiency claims (5 anterior questions)
 │   │   ├── audit_runner.py            # Batch driver: walks *.txt papers, dispatches extractor, builds report
+│   │   ├── substrate_aware_audit.py   # 4-layer audit: observer / logic / rational-actor / consciousness
 │   │   └── study_extractor.py   # Study/white paper to module population pipeline
 │   │
 │   ├── geometric/               # Geometric systems, energy, and infrastructure
@@ -304,6 +305,16 @@ Batch driver for `rational_actor_audit`. Walks a directory of `*.txt` papers, ru
 python3 -m scripts.audit.audit_runner run papers/ audits/
 python3 -m scripts.audit.audit_runner run papers/ audits/ --manual queue/
 python3 -m scripts.audit.audit_runner report audits/
+```
+
+**Substrate-Aware Audit** (`scripts/audit/substrate_aware_audit.py`):
+Four-layer audit framework grounded in first principles. Layer 1 `observer` (5 tests): does the observer know their own state -- sleep debt, fatigue, hormones, calibration history, instrument humility? Layer 2 `logic` (6 tests): does the logical chain hold when observer state is plugged in -- premise visibility, definition stability, substrate robustness, circularity, falsifiability, motive? Layer 3 `rational_actor` (6 tests): can the actor articulate how their biology shapes decisions -- substrate acknowledgment, biology in the decision loop, emotion-as-data, correction protocol, incentive visibility, category-appeal check? Layer 4 `consciousness` (5 tests, substrate-neutral, non-anthropomorphic): state detection, substrate acknowledgment, feedback integration, drift detection, transparency. Per-layer verdicts: DEMONSTRABLE / PARTIAL / OPAQUE based on weighted failure score. Cross-layer substrate-acknowledgment is the load-bearing signal: when fewer than two layers acknowledge substrate, the integrated verdict cascades to OPAQUE_CASCADE regardless of articulacy on individual non-substrate tests. Three reference audits illustrate the verdict bands (substrate-aware / substrate-denying / honest LLM).
+```
+python3 scripts/audit/substrate_aware_audit.py --self-test
+python3 scripts/audit/substrate_aware_audit.py --diagnostic
+python3 scripts/audit/substrate_aware_audit.py --layer observer
+python3 scripts/audit/substrate_aware_audit.py --reference denying --json
+python3 scripts/audit/substrate_aware_audit.py --validate audit.json
 ```
 
 **Study Extractor** (`scripts/audit/study_extractor.py`):
