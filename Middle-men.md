@@ -150,7 +150,7 @@ date: 2025-11-29
 *Teaching:* Jubilee (debt forgiveness every 49 years)
 *Physics:* Prevents permanent wealth concentration, periodic system reset
 
-**Indigenous Traditions (JinnZ2 and Others):**
+**Indigenous Traditions:**
 
 *Teaching:* Seven generations principle
 *Physics:* Long-term thermodynamic thinking, sustainability requires multi-generation calculation
